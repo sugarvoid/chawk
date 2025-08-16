@@ -24,24 +24,32 @@ client = BlackboardClient(client_id, client_secret, base_url, "example.log")
 print(client.user.does_user_exist("00000_0"))
 print(client.courses.does_course_exist("00000_1"))
 
-client.courses.enroll_user(username="dg123", course_id="math101213", role="Student")
+client.courses.enroll_user(username="wilson1234", course_id="ge.math101213", role="Student")
 ```
 
 # Current Functions  
 
 ## User
  ```python
+    create_user(username: str, f_name: str, l_name: str, email: str, password: str) -> None:
+    does_user_exist(username: str) -> bool:
+    update_email(username: str, email: str) -> None:
+    update_availability(username: str, availability: str) -> None:
+    update_data_source(username: str, data_source_id: str) -> None:
+    get_course_role(username: str, course_id: str) -> str:
+    add_institution_roles(username: str, roles: list) -> None:
+    get_enrollments(username: str) -> list[BBCourse]:
 
 ```
 
 ## Course
 
-```python
+```markdown
 
 ```
 
 ## Discussion
-```python
+```markdown
 
 ```
 

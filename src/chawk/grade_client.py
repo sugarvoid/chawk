@@ -32,11 +32,12 @@ def convert_from_iso8601(iso8601_str):
     # Replace 'Z' with '+00:00' so fromisoformat can handle it
     dt = datetime.fromisoformat(iso8601_str.replace("Z", "+00:00"))
     
-    # Ensure timezone-aware
+    # Add utc timezone
     if dt.tzinfo is None:
         dt = dt.replace(tzinfo=timezone.utc)
     
     # Convert to US/Central
+    # TODO: Get local timezone instead of central
     local_time = dt.astimezone(ZoneInfo("US/Central"))
     
     return local_time.strftime('%m-%d-%Y %I:%M %p')
