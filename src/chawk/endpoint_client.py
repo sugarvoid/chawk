@@ -80,6 +80,9 @@ class EndpointClient:
     #GRADEBOOK
     def create_column(self, course_id: str) -> str:
         return f"{self.base_url}/learn/api/public/v2/courses/courseId:{course_id}/gradebook/columns"
+    
+    def get_gradebook_columns(self, course_id: str) -> str:
+        return self.create_column(course_id=course_id)
 
     def get_gradebook_column(self, course_id: str, column_id: str) -> str:
         return f"{self.base_url}/learn/api/public/v2/courses/courseId:{course_id}/gradebook/columns/{column_id}"

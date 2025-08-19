@@ -10,6 +10,14 @@ if TYPE_CHECKING:
     from .blackboard_client import BlackboardClient
 
 
+class GradeColumn:
+    def __init__(self, name: str, points: int, owner: str):
+        #TODO: Add other useful things
+        self.name = name
+        self.col_type = ""
+        self.points = points
+        self.owner = owner
+
 def convert_to_iso8601(date_str, time_str):
     # Combine date and time strings into one
     date_string = f"{date_str} {time_str}"
@@ -163,10 +171,34 @@ class GradeClient:
 
         make_col = self.parent.endpoints.create_column(course_id)
 
-        response = self.parent.post(make_col, data)
+        response = self.parent.post(url=make_col, json=data)
 
         # TODO: Add other possible response codes
         if response.status_code == 201:
             self.parent.logger.info(f"Column {column_name} has been made in course {course_id}")
         else:
             raise ChawkError(f"{response.status_code}: {response.text}")
+
+
+    def get_columns(self, course_id: str) -> list:
+ 
+        url = self.parent.endpoints.get_gradebook_columns(course_id=course_id)
+        all_cols = []
+
+        response = self.parent.get(url=url) 
+
+        if response.status_code == 200:
+            data = response.json()
+            #data = json.dumps(response)
+            #print(data)
+            all_columns = data["results"]
+            #print(len(all_columns))
+            #FIXME: Make this more better
+            for c in all_columns:
+                _name = c["name"]
+                _points = c.get("score", {}).get("possible", 0)
+                _cc = GradeColumn(name=_name, points=_points, owner=course_id)
+                _cc.col_type = c.get("grading", {}).get("type", "Unknown")
+                all_cols.append(_cc)
+            
+            return all_cols
