@@ -1,6 +1,8 @@
 # Chawk 
 
-**This project is a work in progress.**<br>
+> [!WARNING]  
+> This project is a work in progress. 
+<br>
 A python wrapper of the blackboard api to simplify admin tasks such as managing courses.  
 
 # Setup 
