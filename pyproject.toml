@@ -36,5 +36,5 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/sugarvoid/chawk
+Homepage = "https://github.com/sugarvoid/chawk"
 Issues = "https://github.com/sugarvoid/chawk/issues"
