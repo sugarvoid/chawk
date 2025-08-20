@@ -1,9 +1,8 @@
 # Chawk 
+A python wrapper of the blackboard api to simplify admin tasks such as managing courses.  
 
 > [!WARNING]  
 > This project is a work in progress. 
-<br>
-A python wrapper of the blackboard api to simplify admin tasks such as managing courses.  
 
 # Setup 
 You will need to create an application to get the needed keys. You can request access to the Blackboard REST APIs through the [Developer Portal](https://developer.blackboard.com/).  
