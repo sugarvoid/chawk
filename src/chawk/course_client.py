@@ -23,25 +23,23 @@ if TYPE_CHECKING:
 
 
 class Course:
-    def __init__(
-        self,
-        course_id: str,
-        name: str,
-        created: str,
-        last_updated: str,
-        term: str,
-        available: str,
-    ) -> None:
-        self.course_id = course_id
-        self.name = name
-        self.created = format_date(created)
-        self.last_updated = format_date(last_updated)
-        self.instructor: list
-        # FIXME: I don't think this will work
-        self.term = term
-        self.is_available = available
-        self.is_child = False
-        self._parent_id = ""
+    def __init__(self) -> None:
+        self.course_id: str = ""
+        self.name: str = ""
+        self.created: str = ""
+        self.last_updated: str = "" 
+        self.instructor: list[str] = [] #FIXME: I don't think this will work
+        self.term: str = ""
+        self.term_id: str = ""
+        #TODO: Make this a bool
+        self.is_available: str = ""
+        self.is_child: bool = False
+        self._parent_id: str = ""
+        self.data_source_id: str = ""
+        self.id: str = ""
+        self.external_id: str = ""
+        self.is_organization: str = False
+        self.ultra_status: str = ""
 
 
 class CourseClient:
@@ -483,30 +481,24 @@ class CourseClient:
 
     # TODO: remove modified date, not accurate
     # TODO: do i need CourseId:
-    # FIXME: Does this work????
     def _get_course(self, course_raw_id: str) -> Course:
        ## url = self.parent.endpoints.get_course_by_raw_id(course_raw_id=course_raw_id)
-
         if course_raw_id[0] == "_": 
             url = self.parent.endpoints.get_course_by_raw_id(course_raw_id=course_raw_id)
         else:
             url = self.parent.endpoints.get_course(course_id=course_raw_id)
 
-
-
-
         response = self.parent.get(url=url)
 
         if response.status_code == 200:
             course = response.json()
-            course_obj: Course = Course(
-                course.get("externalId"),
-                course.get("name"),
-                course.get("created", "01/1/1992"),
-                course.get("modified", "01/1/1992"),
-                course.get("termId"),
-                course.get("availability", {}).get("available"),
-            )
+            course_obj: Course = Course()
+            course_obj.course_id = course.get("externalId")
+            course_obj.name = course.get("name")
+            course_obj.created = format_date(course.get("created", "01/1/1992"))
+            course_obj.last_updated = format_date(course.get("modified", "01/1/1992"))
+            course_obj.term = course.get("termId")
+            course_obj.is_available = course.get("availability", {}).get("available")
             course_obj._parent_id = course.get("parentId", "")
             if course_obj._parent_id:
                 course_obj.is_child = True
@@ -514,17 +506,17 @@ class CourseClient:
         else:
             raise BlackboardAPIError(f"Failed to fetch course. {response.text}")
 
-    def get_local_id(self, external_id: str):
-        get_course = (
-            f"{self.parent.ORG_DOMAIN}/learn/api/public/v3/courses/{external_id}"
-        )
+    # def get_local_id(self, external_id: str):
+    #     get_course = (
+    #         f"{self.parent.ORG_DOMAIN}/learn/api/public/v3/courses/{external_id}"
+    #     )
 
-        response = self.parent.get(url=get_course)
+    #     response = self.parent.get(url=get_course)
 
-        # TODO: Add other codes
-        if response.status_code == 200:
-            course_id = response.json().get("courseId", "")
-            return course_id
+    #     # TODO: Add other codes
+    #     if response.status_code == 200:
+    #         course_id = response.json().get("courseId", "")
+    #         return course_id
 
     # This works. Been tested
     def get_users_in_course_by_role(self, course_id: str, role: str = "") -> list:
@@ -538,7 +530,7 @@ class CourseClient:
         Returns:
             List: _description_
         """
-        # get_list = f"{self.parent.api_base_url}/learn/api/public/v1/courses/externalId:{course_id}/users"
+
         url = self.parent.endpoints.course_users(course_id=course_id)
         _all_users = []
         _users = []

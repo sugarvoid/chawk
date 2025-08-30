@@ -76,7 +76,6 @@ class GradeClient:
 
         url = self.parent.endpoints.get_gradebook_column(course_id, column_id)
 
-        # _get_column_data = f"{ORG_DOMAIN}/learn/api/public/v2/courses/courseId:{course_id}/gradebook/columns/{column_id}"
 
         response2 = self.parent.get(url)
 
@@ -96,8 +95,6 @@ class GradeClient:
         } 
         else:
             raise ChawkError("Unsupported value for new_value")
-
-        # _update_grade = f"{ORG_DOMAIN}/learn/api/public/v2/courses/courseId:{course_id}/gradebook/columns/{column_id}/users/userName:{username}"
 
         _update_grade = self.parent.endpoints.update_grade(
             course_id, column_id, username
@@ -167,7 +164,6 @@ class GradeClient:
             },
         }
 
-        # make_col = f"{ORG_DOMAIN}/learn/api/public/v2/courses/courseId:{course_id}/gradebook/columns"
 
         make_col = self.parent.endpoints.create_column(course_id)
 

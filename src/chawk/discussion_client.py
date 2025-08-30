@@ -15,10 +15,6 @@ class DiscussionClient:
         self.parent = parent_client
 
     def __get_discussions_ids(self, course_id: str) -> list:
-        #get_list = f"{ORG_DOMAIN}/learn/api/public/v1/courses/courseId:{course_id}/discussions/"
-
-        
-        
         url = self.parent.endpoints.get_discussions(course_id=course_id)
         _all_users = []
         _users = []

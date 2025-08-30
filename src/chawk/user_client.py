@@ -223,7 +223,6 @@ class UserClient:
                 "availability": {"available": f"{availability}"},
             }
 
-            # update_user = f"{ORG_DOMAIN}/learn/api/public/v1/users/userName:{username}"
             update_user = self.parent.endpoints.update_user(username=username)
 
             # response = patch(
@@ -256,8 +255,6 @@ class UserClient:
             raise UserNotFoundError()
 
     def get_course_role(self, username: str, course_id: str) -> str:
-        # get_list = f"{ORG_DOMAIN}/learn/api/public/v1/courses/courseId:{course_id}/users/userName:{username}"
-
         url = self.parent.endpoints.course_user(course_id=course_id, username=username)
 
         res_user_data = self.parent.get(url=url)
