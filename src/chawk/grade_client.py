@@ -6,7 +6,7 @@ from .exceptions import GradebookColumnNotFoundError, ChawkError
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from .user_client import BBUser
+    from .user_client import User
     from .blackboard_client import BlackboardClient
 
 
@@ -72,7 +72,7 @@ class GradeClient:
         col_name = ""
 
         # User is made to get the name, for the logs
-        user: BBUser = self.parent.user.get_user_object(username)
+        user: User = self.parent.user.get_user_object(username)
 
         url = self.parent.endpoints.get_gradebook_column(course_id, column_id)
 

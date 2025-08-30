@@ -6,7 +6,7 @@ from .exceptions import BlackboardAPIError, CourseNotFoundError
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from .user_client import UserClient, BBUser
+    from .user_client import UserClient, User
     from .blackboard_client import BlackboardClient
 
 

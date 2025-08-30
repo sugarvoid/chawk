@@ -22,7 +22,7 @@ if TYPE_CHECKING:
     from .blackboard_client import BlackboardClient
 
 
-class BBCourse:
+class Course:
     def __init__(
         self,
         course_id: str,
@@ -40,6 +40,8 @@ class BBCourse:
         # FIXME: I don't think this will work
         self.term = term
         self.is_available = available
+        self.is_child = False
+        self._parent_id = ""
 
 
 class CourseClient:
@@ -482,14 +484,22 @@ class CourseClient:
     # TODO: remove modified date, not accurate
     # TODO: do i need CourseId:
     # FIXME: Does this work????
-    def _get_course(self, course_raw_id: str) -> BBCourse:
-        url = self.parent.endpoints.get_course_by_raw_id(course_raw_id=course_raw_id)
+    def _get_course(self, course_raw_id: str) -> Course:
+       ## url = self.parent.endpoints.get_course_by_raw_id(course_raw_id=course_raw_id)
+
+        if course_raw_id[0] == "_": 
+            url = self.parent.endpoints.get_course_by_raw_id(course_raw_id=course_raw_id)
+        else:
+            url = self.parent.endpoints.get_course(course_id=course_raw_id)
+
+
+
 
         response = self.parent.get(url=url)
 
         if response.status_code == 200:
             course = response.json()
-            course_obj: BBCourse = BBCourse(
+            course_obj: Course = Course(
                 course.get("externalId"),
                 course.get("name"),
                 course.get("created", "01/1/1992"),
@@ -497,6 +507,9 @@ class CourseClient:
                 course.get("termId"),
                 course.get("availability", {}).get("available"),
             )
+            course_obj._parent_id = course.get("parentId", "")
+            if course_obj._parent_id:
+                course_obj.is_child = True
             return course_obj
         else:
             raise BlackboardAPIError(f"Failed to fetch course. {response.text}")

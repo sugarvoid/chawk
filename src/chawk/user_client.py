@@ -9,10 +9,10 @@ from .exceptions import (
 
 if TYPE_CHECKING:
     from .blackboard_client import BlackboardClient
-    from .course_client import BBCourse
+    from .course_client import Course
 
 
-class BBUser:
+class User:
     """
     A class to represent a user in Blackboard
     """
@@ -109,7 +109,7 @@ class UserClient:
         return True
 
     # TODO: What this do?
-    def get_user_object(self, username: str) -> BBUser:
+    def get_user_object(self, username: str) -> User:
         """
         Gets a user from the system and loads their data in BBUser object.
 
@@ -123,7 +123,7 @@ class UserClient:
         username = username.strip()
 
         if self.does_user_exist(username):
-            user: BBUser = BBUser()
+            user: User = User()
             get_user_url = self.parent.endpoints.get_user(username=username)
 
             response = self.parent.get(get_user_url)
@@ -284,7 +284,7 @@ class UserClient:
                 f"Failed to assign roles to {username}. Status Code: {response.status_code}, Response: {response.text}"
             )
 
-    def get_enrollments(self, username: str) -> list["BBCourse"]:
+    def get_enrollments(self, username: str) -> list["Course"]:
         """
         Returns a list of course objects the user is enrolled in.
         """
