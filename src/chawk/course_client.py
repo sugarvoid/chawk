@@ -122,7 +122,7 @@ class CourseClient:
         """
 
         url = self.parent.endpoints.get_course(course_id=course_id)
-        response = self.parent.get(url)
+        response = self.parent.get(url=url)
 
         if response.status_code == 404:
             self.parent.logger.error(f"Could not access course {course_id}. {response.message}")
@@ -346,7 +346,7 @@ class CourseClient:
 
         update_course = self.parent.endpoints.course_user(course_id, student_id)
 
-        response = self.parent.patch(update_course, _data)
+        response = self.parent.patch(url=update_course, json=_data)
 
         # TODO: Raise errors instead for better error handling
         match response.status_code:

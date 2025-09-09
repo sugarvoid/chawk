@@ -97,7 +97,7 @@ class UserClient:
         """
         url = self.parent.endpoints.get_user(username=username)
 
-        response = self.parent.get(url)
+        response = self.parent.get(url=url)
         if response.status_code == 404:
             return False
         elif response.status_code == 401:
@@ -126,7 +126,7 @@ class UserClient:
             user: User = User()
             get_user_url = self.parent.endpoints.get_user(username=username)
 
-            response = self.parent.get(get_user_url)
+            response = self.parent.get(url=get_user_url)
             if response.status_code == 200:
                 data = response.json()
                 user.roles = data["institutionRoleIds"]
@@ -154,7 +154,7 @@ class UserClient:
         get_user_data = self.parent.endpoints.get_username(username=username)
 
         
-        response = self.parent.get(get_user_data)
+        response = self.parent.get(url=get_user_data)
         if response.status_code == 200:
             data = response.json()
             return data.get("userName", "")
@@ -172,7 +172,7 @@ class UserClient:
             f"{self.parent.get_base_url()}/learn/api/public/v1/users/userName:{username}"
         )
 
-        _response = self.parent.patch(_update_i_email, json=_data)
+        _response = self.parent.patch(url=_update_i_email, json=_data)
 
 
         if _response.status_code == 200:

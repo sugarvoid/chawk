@@ -77,7 +77,7 @@ class GradeClient:
         url = self.parent.endpoints.get_gradebook_column(course_id, column_id)
 
 
-        response2 = self.parent.get(url)
+        response2 = self.parent.get(url=url)
 
         if response2.status_code == 200:
             data = response2.json()
