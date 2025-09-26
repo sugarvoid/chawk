@@ -125,7 +125,7 @@ class CourseClient:
         response = self.parent.get(url=url)
 
         if response.status_code == 404:
-            self.parent.logger.error(f"Could not access course {course_id}. {response.message}")
+            self.parent.logger.error(f"Could not access course {course_id}. {response.text}")
             return False
         elif response.status_code == 400:
             raise BlackboardAPIError("The request did not specify a valid courseId")

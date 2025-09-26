@@ -105,7 +105,8 @@ class BlackboardClient:
                     self.token = None
                     self.expiry_time = None
                 else:
-                    self.logger.info("Token loaded from file.")
+                    pass
+                    # Use token from file
 
     def save_token(self):
         """
