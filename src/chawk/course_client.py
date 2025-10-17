@@ -27,11 +27,11 @@ class Course:
         self.course_id: str = ""
         self.name: str = ""
         self.created: str = ""
-        self.last_updated: str = "" 
-        self.instructor: list[str] = [] #FIXME: I don't think this will work
+        self.last_updated: str = ""
+        self.instructor: list[str] = []  # FIXME: I don't think this will work
         self.term: str = ""
         self.term_id: str = ""
-        #TODO: Make this a bool
+        # TODO: Make this a bool
         self.is_available: str = ""
         self.is_child: bool = False
         self._parent_id: str = ""
@@ -125,7 +125,9 @@ class CourseClient:
         response = self.parent.get(url=url)
 
         if response.status_code == 404:
-            self.parent.logger.error(f"Could not access course {course_id}. {response.text}")
+            self.parent.logger.error(
+                f"Could not access course {course_id}. {response.text}"
+            )
             return False
         elif response.status_code == 400:
             raise BlackboardAPIError("The request did not specify a valid courseId")
@@ -150,7 +152,7 @@ class CourseClient:
 
         # Have to change membership to student first. Yes, we can check if the user is
         # already a student, but that would also cost an api call, so nothing is gained
-        self.__update_course_membership(self, course_id, username, "Student")
+        self.update_course_membership(self, course_id, username, "Student")
 
         url = self.parent.endpoints.course_user(course_id=course_id, username=username)
 
@@ -249,7 +251,9 @@ class CourseClient:
     # TODO: Make forum choice an option in args
     def copy_course_exact(self, master_id: str, copy_id: str) -> None:
         if not self.does_course_exist(master_id):
-            self.parent.logger.error(f"Course: {copy_id} could not be copied from {master_id}, it does not exist.")
+            self.parent.logger.error(
+                f"Course: {copy_id} could not be copied from {master_id}, it does not exist."
+            )
             return
 
         # TODO: Check to make sure "copy from" course even exist
@@ -482,9 +486,11 @@ class CourseClient:
     # TODO: remove modified date, not accurate
     # TODO: do i need CourseId:
     def _get_course(self, course_raw_id: str) -> Course:
-       ## url = self.parent.endpoints.get_course_by_raw_id(course_raw_id=course_raw_id)
-        if course_raw_id[0] == "_": 
-            url = self.parent.endpoints.get_course_by_raw_id(course_raw_id=course_raw_id)
+        ## url = self.parent.endpoints.get_course_by_raw_id(course_raw_id=course_raw_id)
+        if course_raw_id[0] == "_":
+            url = self.parent.endpoints.get_course_by_raw_id(
+                course_raw_id=course_raw_id
+            )
         else:
             url = self.parent.endpoints.get_course(course_id=course_raw_id)
 
@@ -550,7 +556,7 @@ class CourseClient:
 
             return _users
 
-    def __update_course_membership(
+    def update_course_membership(
         self, course_id: str, username: str, course_role: str = "Student"
     ) -> None:
         _data = {
