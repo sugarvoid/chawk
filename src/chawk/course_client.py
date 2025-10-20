@@ -88,7 +88,7 @@ class CourseClient:
                 "courseRoleId": role.strip(),
             }
 
-            url = self.parent.endpoints.enroll_user(course_id.strip(), username.strip())
+            url = self.parent.endpoints.put_course_membership(course_id.strip(), username.strip())
             res_user_data = self.parent.put(url=url, json=data)
 
             if res_user_data.status_code == 409:
@@ -154,7 +154,7 @@ class CourseClient:
         # already a student, but that would also cost an api call, so nothing is gained
         self.update_course_membership(self, course_id, username, "Student")
 
-        url = self.parent.endpoints.course_user(course_id=course_id, username=username)
+        url = self.parent.endpoints.delete_course_membership(course_id=course_id, username=username)
 
         _response = self.parent.delete(url=url)
         if _response.status_code == 204:
@@ -348,7 +348,7 @@ class CourseClient:
             "availability": {"available": available},
         }
 
-        update_course = self.parent.endpoints.course_user(course_id, student_id)
+        update_course = self.parent.endpoints.update_course_membership(course_id, student_id)
 
         response = self.parent.patch(url=update_course, json=_data)
 
@@ -563,7 +563,7 @@ class CourseClient:
             "courseRoleId": f"{course_role}",
         }
 
-        url = self.parent.endpoints.course_user(course_id=course_id, username=username)
+        url = self.parent.endpoints.update_course_membership(course_id=course_id, username=username)
         response = self.parent.patch(url=url, json=_data)
 
         # TODO: Make error info better

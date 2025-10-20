@@ -255,7 +255,7 @@ class UserClient:
             raise UserNotFoundError()
 
     def get_course_role(self, username: str, course_id: str) -> str:
-        url = self.parent.endpoints.course_user(course_id=course_id, username=username)
+        url = self.parent.endpoints.get_course_membership(course_id=course_id, username=username)
 
         res_user_data = self.parent.get(url=url)
 
@@ -285,7 +285,7 @@ class UserClient:
         """
         Returns a list of course objects the user is enrolled in.
         """
-        url = self.parent.endpoints.user_enrollments(username=username)
+        url = self.parent.endpoints.get_user_memberships(username=username)
         response = self.parent.get(url=url)
 
         if response.status_code != 200:

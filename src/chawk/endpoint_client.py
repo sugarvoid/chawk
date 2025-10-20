@@ -6,6 +6,7 @@ class EndpointClient:
 
     def get_token(self) -> str:
         return f"{self.base_url}/learn/api/public/v1/oauth2/token"
+    
 
     #COURSE 
     def add_child(self, course_id: str, child_id:str) -> str:
@@ -32,8 +33,20 @@ class EndpointClient:
         """
         return f"{self.base_url}/learn/api/public/v2/courses/courseId:{course_id}/copy"
 
-    def course_user(self, course_id: str, username: str) -> str:
+    # def course_user(self, course_id: str, username: str) -> str:
+    #     return f"{self.base_url}/learn/api/public/v1/courses/courseId:{course_id}/users/userName:{username}"
+    
+    def get_course_membership(self, course_id: str, username: str) -> str:
         return f"{self.base_url}/learn/api/public/v1/courses/courseId:{course_id}/users/userName:{username}"
+    
+    def update_course_membership(self, course_id: str, username: str) -> str:
+        return self.get_course_membership(course_id=course_id, username=username)
+    
+    def put_course_membership(self, course_id: str, username: str) -> str:
+        return self.get_course_membership(course_id=course_id, username=username)
+    
+    def delete_course_membership(self, course_id: str, username: str) -> str:
+        return self.get_course_membership(course_id=course_id, username=username)
     
     def course_users(self, course_id: str) -> str:
         return f"{self.base_url}/learn/api/public/v1/courses/externalId:{course_id}/users"
@@ -62,8 +75,10 @@ class EndpointClient:
     def get_username(self, username: str) -> str:
         return f"{self.base_url}/learn/api/public/v1/users/{username}"
     
-    def user_enrollments(self, username: str) -> str:
+    def get_user_memberships(self, username: str) -> str:
         return f"{self.base_url}/learn/api/public/v1/users/userName:{username}/courses"
+    
+  
 
 
     #DISCUSSION
