@@ -16,12 +16,14 @@ class User:
     """
     A class to represent a user in Blackboard
     """
-
     username: str
     first_name: str
     last_name: str
     email: str
     roles: list
+    available: str
+    data_source_id: str
+
 
 
 class UserClient:
@@ -132,6 +134,9 @@ class UserClient:
                 user.roles = data["institutionRoleIds"]
                 user.first_name = data["name"]["given"]
                 user.last_name = data["name"]["family"]
+                user.available = data["availability"]["available"]
+                user.data_source_id = data["dataSourceId"]
+                user.email = data["contact"]["email"]
                 # TODO: Add email??
                 return user
             else:

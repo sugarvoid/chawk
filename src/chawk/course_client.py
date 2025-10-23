@@ -40,6 +40,7 @@ class Course:
         self.external_id: str = ""
         self.is_organization: str = False
         self.ultra_status: str = ""
+        self.description: str = ""
 
 
 class CourseClient:

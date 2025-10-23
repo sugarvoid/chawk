@@ -116,6 +116,6 @@ class EndpointClient:
     def get_announcement(self, course_id: str, announcement_id: str) -> str:
         return f"/learn/api/public/v1/courses/{course_id}/announcements/{announcement_id}"
     
-    def patch_announcement(self, course_id: str, announcement_id: str) -> str:
+    def delete_announcement(self, course_id: str, announcement_id: str) -> str:
         return self.get_announcement(course_id, announcement_id)
     
