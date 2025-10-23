@@ -16,6 +16,7 @@ class User:
     """
     A class to represent a user in Blackboard
     """
+
     username: str
     first_name: str
     last_name: str
@@ -49,9 +50,7 @@ class UserClient:
         password = password.strip()
 
         if not all([username, f_name, l_name]):
-            raise ValueError(
-                "Missing parameters (username, f_name, l_name)."
-            )
+            raise ValueError("Missing parameters (username, f_name, l_name).")
         else:
             _data = {
                 "userName": f"{username}",
@@ -71,7 +70,9 @@ class UserClient:
 
             match _response.status_code:
                 case 201:
-                    self.parent.logger.info(f"User {username}, was created successfully")
+                    self.parent.logger.info(
+                        f"User {username}, was created successfully"
+                    )
                 case 403:
                     self.parent.logger.error(
                         "The currently authenticated user has insufficient privileges to create a new user."
@@ -84,7 +85,6 @@ class UserClient:
                     self.parent.logger.error(
                         f"An error occurred while creating the new user. {_response.text}"
                     )
-
 
     def does_user_exist(self, username: str) -> bool:
         """Checks to see if a user is already added to the system.
@@ -137,8 +137,6 @@ class UserClient:
             else:
                 return None
 
-
-
     # This works. been tested
     def get_local_username_from_id(self, username: str) -> str:
         """
@@ -153,7 +151,6 @@ class UserClient:
 
         get_user_data = self.parent.endpoints.get_username(username=username)
 
-        
         response = self.parent.get(url=get_user_data)
         if response.status_code == 200:
             data = response.json()
@@ -161,41 +158,53 @@ class UserClient:
         else:
             return ""
 
-
-    def update_institution_email(self, username: str, i_email: str) -> None:
-        _data = {
-            "contact": {
-                "institutionEmail": f"{i_email}",
-            },
-        }
-        _update_i_email = (
-            f"{self.parent.get_base_url()}/learn/api/public/v1/users/userName:{username}"
-        )
-
-        _response = self.parent.patch(url=_update_i_email, json=_data)
-
-
-        if _response.status_code == 200:
-            self.parent.logger.info(f"{username}'s institution email was updated to {i_email}")
-        else:
-            self.parent.logger.error(f"Updating {username}'s institution email failed. {_response}")
-
-    # Good
-    def update_email(self, username: str, email: str) -> None:
-        # TODO: check for user first
-        _data = {
-            "contact": {
-                "email": f"{email.strip()}",
-            }
-        }
-
-        url = self.parent.endpoints.update_user(username=username)
-        response = self.parent.patch(url=url, json=_data)
+    def _update_user(self, username: str, data: dict, action: str = "updated") -> None:
+        """(Internal) Helper method. Do not use directly."""
+        url = self.parent.endpoints.get_user(username=username)
+        response = self.parent.patch(url=url, json=data)
 
         if response.status_code == 200:
-            self.parent.logger.info(f"User {username} email has been changed to {email}")
+            self.parent.logger.info(f"User {username} {action}.")
         else:
-            self.parent.logger.error(f"Failed to update {username}. {response.text}")
+            self.parent.logger.error(
+                f"Failed to update course {username}. Status: {response.status_code}. Response: {response.text}"
+            )
+            # Raise a real exception, maybe?
+
+    def update_password(self, username: str, new_password: str) -> None:
+        self._update_user(
+            username=username,
+            data={"password": new_password.strip()},
+            action="password changed",
+        )
+
+    def update_email(self, username: str, new_email: str) -> None:
+        self._update_user(
+            username=username,
+            data={"contact": {"email": new_email.strip()}},
+            action="email changed",
+        )
+
+    def update_institution_email(self, username: str, new_email: str) -> None:
+        self._update_user(
+            username=username,
+            data={"contact": {"institutionEmail": new_email.strip()}},
+            action="institution email changed",
+        )
+
+    def update_name(self, username: str, f_name: str, l_name: str) -> None:
+        if not f_name and not l_name:
+            raise ChawkError("First and last name was not provided.")
+        self._update_user(
+            username=username,
+            data={
+                "name": {
+                    "given": f"{f_name}",
+                    "family": f"{l_name}",
+                },
+            },
+            action="name changed",
+        )
 
     def delete_user(username: str) -> int:
         """
@@ -238,7 +247,9 @@ class UserClient:
 
             if response.status_code == 200:
                 ##data = res_user_data.json()
-                self.parent.logger.info(f"User {username} availability been set to {availability}")
+                self.parent.logger.info(
+                    f"User {username} availability been set to {availability}"
+                )
         else:
             self.parent.logger.error(f"User {username} does not exist")
 
@@ -250,12 +261,16 @@ class UserClient:
             response = self.parent.patch(url=update_user, json=_data)
 
             if response.status_code == 200:
-                self.parent.logger.info(f"User {username} data source set to {data_source_id}")
+                self.parent.logger.info(
+                    f"User {username} data source set to {data_source_id}"
+                )
         else:
             raise UserNotFoundError()
 
     def get_course_role(self, username: str, course_id: str) -> str:
-        url = self.parent.endpoints.get_course_membership(course_id=course_id, username=username)
+        url = self.parent.endpoints.get_course_membership(
+            course_id=course_id, username=username
+        )
 
         res_user_data = self.parent.get(url=url)
 

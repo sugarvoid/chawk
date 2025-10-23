@@ -35,6 +35,9 @@ client.course.enroll_user(username="wilson1234", course_id="math101213", role="S
     create_user(username: str, f_name: str, l_name: str, email: str, password: str) -> None
     does_user_exist(username: str) -> bool
     update_email(username: str, email: str) -> None
+    update_name(username: str, f_name: str, l_name: str) -> None
+    update_password(username: str, password: str) -> None
+    update_institution_email(username: str, email: str) -> None
     update_availability(username: str, availability: str) -> None
     update_data_source(username: str, data_source_id: str) -> None
     get_course_role(username: str, course_id: str) -> str
