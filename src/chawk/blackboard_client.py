@@ -117,9 +117,6 @@ class BlackboardClient:
                 json.dump(
                     {"access_token": self.token, "expiry_time": self.expiry_time}, f
                 )
-            self.logger.info("Token saved to file.")
-        else:
-            self.logger.info("failed to save file")
 
     def authenticate(self):
         """
@@ -128,9 +125,7 @@ class BlackboardClient:
         self._load_token()
         if not self.token or time.time() > self.expiry_time:
             self.request_new_token()
-            self.logger.info("Authenticated successfully.")
         else:
-            # Already had a good token
             return
 
     def request_new_token(self) -> int:
@@ -173,7 +168,7 @@ class BlackboardClient:
             int: The number of remaining calls
         """
         # Random endpoint to get a response from
-        url = f"{self.base_url}/learn/api/public/v1/users/userName:1000001"
+        url = f"{self.base_url}/learn/api/public/v1/users?limit=1"
         response = self.session.get(url)
         remaining_requests = response.headers.get("X-Rate-Limit-Remaining")
         if remaining_requests:
