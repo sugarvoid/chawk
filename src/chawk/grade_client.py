@@ -1,4 +1,3 @@
-
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 from .exceptions import GradebookColumnNotFoundError, ChawkError
@@ -12,45 +11,48 @@ if TYPE_CHECKING:
 
 class GradeColumn:
     def __init__(self, name: str, points: int, owner: str):
-        #TODO: Add other useful things
+        # TODO: Add other useful things
         self.name = name
         self.col_type = ""
         self.points = points
         self.owner = owner
+
 
 def convert_to_iso8601(date_str, time_str):
     # Combine date and time strings into one
     date_string = f"{date_str} {time_str}"
 
     # Parse into naive datetime
-    date_obj = datetime.strptime(date_string, '%m-%d-%Y %I:%M %p')
+    date_obj = datetime.strptime(date_string, "%m-%d-%Y %I:%M %p")
 
     # Set to US/Central, respecting DST automatically
-    #TODO: Get timezone from device
+    # TODO: Get timezone from device
     local_time = date_obj.replace(tzinfo=ZoneInfo("US/Central"))
 
     # Convert to UTC
     utc_time = local_time.astimezone(timezone.utc)
 
     # Format as ISO 8601 with no seconds/milliseconds
-    return utc_time.strftime('%Y-%m-%dT%H:%M:00Z')
+    return utc_time.strftime("%Y-%m-%dT%H:%M:00Z")
 
 
 def convert_from_iso8601(iso8601_str):
     # Replace 'Z' with '+00:00' so fromisoformat can handle it
     dt = datetime.fromisoformat(iso8601_str.replace("Z", "+00:00"))
-    
+
     # Add utc timezone
     if dt.tzinfo is None:
         dt = dt.replace(tzinfo=timezone.utc)
-    
+
     # Convert to US/Central
     # TODO: Get local timezone instead of central
     local_time = dt.astimezone(ZoneInfo("US/Central"))
-    
-    return local_time.strftime('%m-%d-%Y %I:%M %p')
 
-#TODO: Test these functions
+    return local_time.strftime("%m-%d-%Y %I:%M %p")
+
+
+# TODO: Test these functions
+
 
 class GradeClient:
     def __init__(self, parent_client: "BlackboardClient"):
@@ -76,7 +78,6 @@ class GradeClient:
 
         url = self.parent.endpoints.get_gradebook_column(course_id, column_id)
 
-
         response2 = self.parent.get(url=url)
 
         if response2.status_code == 200:
@@ -87,12 +88,12 @@ class GradeClient:
 
         if type(new_value) is str:
             _data = {
-            "text": f"{new_value}",
-        }
+                "text": f"{new_value}",
+            }
         elif type(new_value) is int:
             _data = {
-            "score": new_value,
-        } 
+                "score": new_value,
+            }
         else:
             raise ChawkError("Unsupported value for new_value")
 
@@ -164,37 +165,33 @@ class GradeClient:
             },
         }
 
-
         make_col = self.parent.endpoints.create_column(course_id)
 
         response = self.parent.post(url=make_col, json=data)
 
         # TODO: Add other possible response codes
         if response.status_code == 201:
-            self.parent.logger.info(f"Column {column_name} has been made in course {course_id}")
+            self.parent.logger.info(
+                f"Column {column_name} has been made in course {course_id}"
+            )
         else:
             raise ChawkError(f"{response.status_code}: {response.text}")
 
-
     def get_columns(self, course_id: str) -> list:
- 
         url = self.parent.endpoints.get_gradebook_columns(course_id=course_id)
         all_cols = []
 
-        response = self.parent.get(url=url) 
+        response = self.parent.get(url=url)
 
         if response.status_code == 200:
             data = response.json()
-            #data = json.dumps(response)
-            #print(data)
             all_columns = data["results"]
-            #print(len(all_columns))
-            #FIXME: Make this more better
+            # FIXME: Make this more better
             for c in all_columns:
                 _name = c["name"]
                 _points = c.get("score", {}).get("possible", 0)
                 _cc = GradeColumn(name=_name, points=_points, owner=course_id)
                 _cc.col_type = c.get("grading", {}).get("type", "Unknown")
                 all_cols.append(_cc)
-            
+
             return all_cols

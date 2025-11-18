@@ -16,6 +16,7 @@ class User:
     """
     A class to represent a user in Blackboard
     """
+
     username: str
     first_name: str
     last_name: str
@@ -23,7 +24,6 @@ class User:
     roles: list
     available: str
     data_source_id: str
-
 
 
 class UserClient:
@@ -187,28 +187,28 @@ class UserClient:
         self._update_user(
             username=username,
             data={"contact": {"email": new_email.strip()}},
-            action="email changed",
+            action=f"email changed to {new_email}",
         )
 
     def update_institution_email(self, username: str, new_email: str) -> None:
         self._update_user(
             username=username,
             data={"contact": {"institutionEmail": new_email.strip()}},
-            action="institution email changed",
+            action=f"institution email changed to {new_email}",
         )
 
-    def update_name(self, username: str, f_name: str, l_name: str) -> None:
-        if not f_name and not l_name:
+    def update_name(self, username: str, first_name: str, last_name: str) -> None:
+        if not first_name and not last_name:
             raise ChawkError("First and last name was not provided.")
         self._update_user(
             username=username,
             data={
                 "name": {
-                    "given": f"{f_name}",
-                    "family": f"{l_name}",
+                    "given": f"{first_name}",
+                    "family": f"{last_name}",
                 },
             },
-            action="name changed",
+            action=f"name changed to {first_name} {last_name}",
         )
 
     def delete_user(username: str) -> int:
