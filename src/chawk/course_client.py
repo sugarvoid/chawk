@@ -38,7 +38,7 @@ class Course:
         self.data_source_id: str = ""
         self.id: str = ""
         self.external_id: str = ""
-        self.is_organization: str = False
+        self.is_organization: bool = False
         self.ultra_status: str = ""
         self.description: str = ""
 
@@ -55,12 +55,14 @@ class CourseClient:
             course_id (str): _description_
             child_id (str): _description_
         """
-        url = self.parent.endpoints.add_child(course_id=course_id, child_id=child_id)
+        url = self.parent.endpoints.add_child(
+            course_id=course_id, child_id=child_id)
         res_add_child = self.parent.put(url=url)
 
         # TODO: Add exceptions, maybe
         if res_add_child.status_code != 201:
-            self.parent.logger.error(f"Failed to add {child_id} to {course_id}")
+            self.parent.logger.error(
+                f"Failed to add {child_id} to {course_id}")
 
         if res_add_child.status_code == 201:
             self.parent.logger.info(
@@ -89,7 +91,8 @@ class CourseClient:
                 "courseRoleId": role.strip(),
             }
 
-            url = self.parent.endpoints.put_course_membership(course_id.strip(), username.strip())
+            url = self.parent.endpoints.put_course_membership(
+                course_id.strip(), username.strip())
             res_user_data = self.parent.put(url=url, json=data)
 
             if res_user_data.status_code == 409:
@@ -103,7 +106,8 @@ class CourseClient:
                 )
 
             if res_user_data.status_code == 400:
-                self.parent.logger.error("Could not match roleId to any existing roles")
+                self.parent.logger.error(
+                    "Could not match roleId to any existing roles")
 
         else:
             self.parent.logger.error(
@@ -131,7 +135,8 @@ class CourseClient:
             )
             return False
         elif response.status_code == 400:
-            raise BlackboardAPIError("The request did not specify a valid courseId")
+            raise BlackboardAPIError(
+                "The request did not specify a valid courseId")
         elif response.status_code != 200:
             raise BlackboardAPIError(
                 f"Unexpected response: {response.status_code} {response.text}"
@@ -155,11 +160,13 @@ class CourseClient:
         # already a student, but that would also cost an api call, so nothing is gained
         self.update_course_membership(self, course_id, username, "Student")
 
-        url = self.parent.endpoints.delete_course_membership(course_id=course_id, username=username)
+        url = self.parent.endpoints.delete_course_membership(
+            course_id=course_id, username=username)
 
         _response = self.parent.delete(url=url)
         if _response.status_code == 204:
-            self.parent.logger.info(f"{username} was removed from {course_id}.")
+            self.parent.logger.info(
+                f"{username} was removed from {course_id}.")
         else:
             self.parent.logger.error(
                 f"Failed to remove {username} from course. {_response.text}"
@@ -178,7 +185,8 @@ class CourseClient:
 
         # TODO: Check that the role is a valid role in te list
 
-        my_guys = self.get_users_in_course_by_role(course_id=course_id, role=role)
+        my_guys = self.get_users_in_course_by_role(
+            course_id=course_id, role=role)
 
         if len(my_guys) > 0:
             for u in my_guys:
@@ -200,11 +208,13 @@ class CourseClient:
             course_id (str): _description_
         """
         _course_id = course_id.strip()
-        my_guys = self.get_users_in_course_by_role(course_id=_course_id, role="Student")
+        my_guys = self.get_users_in_course_by_role(
+            course_id=_course_id, role="Student")
         students: list = []
 
         for guy in my_guys:
-            id = self.parent.user.get_local_username_from_id(username=guy.get("userId"))
+            id = self.parent.user.get_local_username_from_id(
+                username=guy.get("userId"))
             students.append(id)
 
         return students
@@ -264,7 +274,8 @@ class CourseClient:
             }
         }
 
-        copy_course = self.parent.endpoints.copy_course(course_id=master_id.strip())
+        copy_course = self.parent.endpoints.copy_course(
+            course_id=master_id.strip())
 
         response = self.parent.post(url=copy_course, json=_data)
 
@@ -349,7 +360,8 @@ class CourseClient:
             "availability": {"available": available},
         }
 
-        update_course = self.parent.endpoints.update_course_membership(course_id, student_id)
+        update_course = self.parent.endpoints.update_course_membership(
+            course_id, student_id)
 
         response = self.parent.patch(url=update_course, json=_data)
 
@@ -360,7 +372,8 @@ class CourseClient:
                     f"{student_id} has been made available({available}) in course {course_id}"
                 )
             case 400:
-                self.parent.logger.error("The request did not specify valid data")
+                self.parent.logger.error(
+                    "The request did not specify valid data")
             case 404:
                 self.parent.logger.error(
                     "Course not found or course membership not found"
@@ -467,7 +480,8 @@ class CourseClient:
                 f"Course {course_id} has been renamed to {new_name}"
             )
         else:
-            self.parent.logger.error(f"Failed to rename {course_id}. {response.text}")
+            self.parent.logger.error(
+                f"Failed to rename {course_id}. {response.text}")
 
     def update_course_term(self, course_id: str, term_id: str) -> None:
         term_id = term_id.strip()
@@ -487,7 +501,7 @@ class CourseClient:
     # TODO: remove modified date, not accurate
     # TODO: do i need CourseId:
     def _get_course(self, course_raw_id: str) -> Course:
-        ## url = self.parent.endpoints.get_course_by_raw_id(course_raw_id=course_raw_id)
+        # url = self.parent.endpoints.get_course_by_raw_id(course_raw_id=course_raw_id)
         if course_raw_id[0] == "_":
             url = self.parent.endpoints.get_course_by_raw_id(
                 course_raw_id=course_raw_id
@@ -502,16 +516,22 @@ class CourseClient:
             course_obj: Course = Course()
             course_obj.course_id = course.get("externalId")
             course_obj.name = course.get("name")
-            course_obj.created = format_date(course.get("created", "01/1/1992"))
-            course_obj.last_updated = format_date(course.get("modified", "01/1/1992"))
+            course_obj.created = format_date(
+                course.get("created", "01/1/1992"))
+            course_obj.last_updated = format_date(
+                course.get("modified", "01/1/1992"))
             course_obj.term = course.get("termId")
-            course_obj.is_available = course.get("availability", {}).get("available")
+            course_obj.is_available = course.get(
+                "availability", {}).get("available")
             course_obj._parent_id = course.get("parentId", "")
+            course_obj.ultra_status = course.get("ultraStatus", "")
+            course_obj.description = course.get("description", "")
             if course_obj._parent_id:
                 course_obj.is_child = True
             return course_obj
         else:
-            raise BlackboardAPIError(f"Failed to fetch course. {response.text}")
+            raise BlackboardAPIError(
+                f"Failed to fetch course. {response.text}")
 
     # def get_local_id(self, external_id: str):
     #     get_course = (
@@ -564,7 +584,8 @@ class CourseClient:
             "courseRoleId": f"{course_role}",
         }
 
-        url = self.parent.endpoints.update_course_membership(course_id=course_id, username=username)
+        url = self.parent.endpoints.update_course_membership(
+            course_id=course_id, username=username)
         response = self.parent.patch(url=url, json=_data)
 
         # TODO: Make error info better
@@ -574,7 +595,8 @@ class CourseClient:
                     f"{username} role has been changed to {course_role} in course {course_id}"
                 )
             case 400:
-                self.parent.logger.error("The request did not specify valid data")
+                self.parent.logger.error(
+                    "The request did not specify valid data")
             case 403:
                 self.parent.logger.error("User has insufficient privileges")
             case 404:
@@ -582,7 +604,8 @@ class CourseClient:
                     "Course not found or course membership not found"
                 )
             case 409:
-                self.parent.logger.error("Conflict?? but what does that even mean")
+                self.parent.logger.error(
+                    "Conflict?? but what does that even mean")
 
     def delete_course(self, course_id: str) -> None:
         """
@@ -604,7 +627,8 @@ class CourseClient:
 
     # TODO: Work in progress
     def get_content(self, course_id: str) -> list:
-        get_list = f"{self.parent.get_base_url()}/learn/api/public/v1/courses/courseId:{course_id}/contents"
+        get_list = f"{self.parent.get_base_url(
+        )}/learn/api/public/v1/courses/courseId:{course_id}/contents"
 
         res_user_data = self.parent.get(url=get_list)
 

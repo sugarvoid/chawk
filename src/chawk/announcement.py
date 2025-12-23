@@ -10,18 +10,15 @@ class AnnouncementClient:
     def __init__(self, parent_client: "BlackboardClient"):
         self.parent = parent_client
 
-    def get_announcements(self, course_id: str) -> list:
-        pass
+    def get_all_announcements(self, course_id: str) -> list:
+        return []
 
-    def get_announcement(
-        self,
-    ) -> list:
-        pass
+    def get_announcement(self) -> list:
+        return []
 
     # TODO: Look at how I did the
     def update_announcement_text(self) -> list:
-        pass
-
+        return []
 
     #TODO: Test this
     def delete_announcements(self, course_id: str) -> list:

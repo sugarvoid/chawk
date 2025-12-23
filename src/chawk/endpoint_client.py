@@ -75,8 +75,8 @@ class EndpointClient:
     def get_username(self, username: str) -> str:
         return f"{self.base_url}/learn/api/public/v1/users/{username}"
     
-    def get_user_memberships(self, username: str) -> str:
-        return f"{self.base_url}/learn/api/public/v1/users/userName:{username}/courses"
+    def get_user_memberships(self, username: str, role: str = "") -> str:
+        return f"{self.base_url}/learn/api/public/v1/users/userName:{username}/courses?courseRoleId={role}"
     
   
 

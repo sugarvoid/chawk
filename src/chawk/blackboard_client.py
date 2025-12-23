@@ -60,23 +60,23 @@ class BlackboardClient:
 
         return _response
 
-    def get(self, url, **kwargs):
+    def get(self, url: str, **kwargs: object):
         """Send a GET request using the authenticated session."""
         return self._send_request("GET", url, **kwargs)
 
-    def post(self, url, data=None, json=None, **kwargs):
+    def post(self, url: str, data: object | None = None, json: object | None = None, **kwargs: object):
         """Send a POST request using the authenticated session."""
         return self._send_request("POST", url, data=data, json=json, **kwargs)
 
-    def put(self, url, data=None, json=None, **kwargs):
+    def put(self, url: str, data: object | None = None, json: object | None = None, **kwargs: object):
         """Send a PUT request using the authenticated session."""
         return self._send_request("PUT", url, data=data, json=json, **kwargs)
 
-    def patch(self, url, data=None, json=None, **kwargs):
+    def patch(self, url: str, data: object | None = None, json: object | None = None, **kwargs: object):
         """Send a PATCH request using the authenticated session."""
         return self._send_request("PATCH", url, data=data, json=json, **kwargs)
 
-    def delete(self, url, **kwargs):
+    def delete(self, url: str, **kwargs: object):
         """Send a DELETE request using the authenticated session."""
         return self._send_request("DELETE", url, **kwargs)
 
