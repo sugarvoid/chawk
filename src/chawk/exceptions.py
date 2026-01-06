@@ -9,9 +9,16 @@ class AuthenticationError(BlackboardAPIError):
 
 class UserNotFoundError(BlackboardAPIError):
     """Raised when a requested user does not exist."""
+    def __init__(self, username: str):
+        #self.username = username
+        super().__init__(f"User '{username}' not found")
 
 class CourseNotFoundError(BlackboardAPIError):
     """Raised when a requested course does not exist."""
+    def __init__(self, course_id: str):
+        #self.username = username
+        super().__init__(f"User '{course_id}' not found")
+    
 
 class GradebookColumnNotFoundError(BlackboardAPIError):
     """Raised when a requested gradebook column does not exist."""
