@@ -42,9 +42,13 @@ class UserClient:
             email (str): New user's email address
             password (str): New user's password
 
-        Returns:
-            int: _description_
+        Raises:
+            ValueError
+            AuthenticationError
+            UserAlreadyExistsError
+            BlackboardAPIError
         """
+
         username = username.strip()
         f_name = f_name.strip()
         l_name = l_name.strip()
@@ -54,32 +58,40 @@ class UserClient:
         if not all([username, f_name, l_name]):
             raise ValueError("Missing parameters (username, f_name, l_name).")
         else:
-            _data = {
-                "userName": f"{username}",
-                "password": f"{password}",
+            payload = {
+                "userName": username,
+                "password": password,
                 "availability": {"available": "Yes"},
                 "name": {
-                    "given": f"{f_name}",
-                    "family": f"{l_name}",
+                    "given": f_name,
+                    "family": l_name,
                     "preferredDisplayName": "GivenName",
                 },
                 "contact": {
-                    "email": f"{email}",
+                    "email": email,
                 },
             }
+
             _make_user = self.parent.endpoints.create_user()
-            _response = self.parent.post(_make_user, json=_data)
+            _response = self.parent.post(_make_user, json=payload)
 
             match _response.status_code:
                 case 201:
                     self.parent.logger.info(
                         f"User {username}, was created successfully"
                     )
+                    return
                 case 403:
+                    # raise AuthenticationError(
+                    #     "Insufficient privileges to create a user."
+                    # )
                     self.parent.logger.error(
                         "The currently authenticated user has insufficient privileges to create a new user."
                     )
                 case 409:
+                    # raise BlackboardAPIError(
+                    #     f"Error creating user: {_response.text}"
+                    # )
                     self.parent.logger.error(
                         f"A user with the ID of {username} already exists."
                     )
@@ -124,24 +136,32 @@ class UserClient:
 
         username = username.strip()
 
-        if self.does_user_exist(username):
-            user: User = User()
-            get_user_url = self.parent.endpoints.get_user(username=username)
+        if not self.does_user_exist(username):
+            raise UserNotFoundError(username)
 
-            response = self.parent.get(url=get_user_url)
-            if response.status_code == 200:
-                data = response.json()
-                user.roles = data["institutionRoleIds"]
-                user.first_name = data["name"]["given"]
-                user.last_name = data["name"]["family"]
-                user.available = data["availability"]["available"]
-                user.data_source_id = data["dataSourceId"]
-                user.email = data["contact"]["email"]
-                # TODO: Add email??
-                return user
-            else:
-                return None
 
+
+        
+        user: User = User()
+        get_user_url = self.parent.endpoints.get_user(username=username)
+
+        response = self.parent.get(url=get_user_url)
+
+        if response.status_code != 200:
+            raise BlackboardAPIError(
+                f"Failed to retrieve user '{username}' (status {response.status_code})"
+            )
+
+        data = response.json()
+        user.roles = data["institutionRoleIds"]
+        user.first_name = data["name"]["given"]
+        user.last_name = data["name"]["family"]
+        user.available = data["availability"]["available"]
+        user.data_source_id = data["dataSourceId"]
+        user.email = data["contact"]["email"]
+        # TODO: Add email??
+        return user
+   
     # This works. been tested
     def get_local_username_from_id(self, username: str) -> str:
         """
@@ -211,7 +231,7 @@ class UserClient:
             action=f"name changed to {first_name} {last_name}",
         )
 
-    def delete_user(username: str) -> int:
+    def delete_user(self, username: str) -> None:
         """
         Delete a user from the system.
 
@@ -270,7 +290,7 @@ class UserClient:
                     f"User {username} data source set to {data_source_id}"
                 )
         else:
-            raise UserNotFoundError()
+            raise UserNotFoundError(username)
 
     def get_course_role(self, username: str, course_id: str) -> str:
         url = self.parent.endpoints.get_course_membership(
