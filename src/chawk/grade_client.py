@@ -153,7 +153,7 @@ class GradeClient:
 
     # FIXME: Works in old way, update to package
     def create_gradebook_column(
-        self, course_id: str, column_name: str, description: str, score: int
+        self, course_id: str, column_name: str, description: str, score: int|float
     ) -> None:
         data = {
             "name": f"{column_name}",
@@ -177,7 +177,7 @@ class GradeClient:
         else:
             raise ChawkError(f"{response.status_code}: {response.text}")
 
-    def get_columns(self, course_id: str) -> list:
+    def get_columns(self, course_id: str) -> list[GradeColumn]:
         url = self.parent.endpoints.get_gradebook_columns(course_id=course_id)
         all_cols = []
 
@@ -194,4 +194,6 @@ class GradeClient:
                 _cc.col_type = c.get("grading", {}).get("type", "Unknown")
                 all_cols.append(_cc)
 
-            return all_cols
+        return all_cols
+ 
+

@@ -325,6 +325,7 @@ class UserClient:
         """
         Returns a list of course objects the user is enrolled in.
         """
+        # TODO: Add a way to know the users role in the course
         url = self.parent.endpoints.get_user_memberships(username=username)
         response = self.parent.get(url=url)
 
