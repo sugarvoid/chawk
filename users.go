@@ -1,7 +1,6 @@
 package chawk
 
 import (
-	endpoints "chawk/endpoints"
 	"context"
 	"encoding/json"
 	"errors"
@@ -10,6 +9,8 @@ import (
 	"net/http"
 	"strings"
 	"time"
+
+	endpoints "github.com/ToyGuy22/chawk/endpoints"
 )
 
 type UserService struct {

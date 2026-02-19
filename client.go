@@ -2,7 +2,6 @@ package chawk
 
 import (
 	"bytes"
-	endpoints "chawk/endpoints"
 	"context"
 	"encoding/json"
 	"errors"
@@ -13,6 +12,8 @@ import (
 	"path/filepath"
 	"sync"
 	"time"
+
+	endpoints "github.com/ToyGuy22/chawk/endpoints"
 )
 
 var (

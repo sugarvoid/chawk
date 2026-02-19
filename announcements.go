@@ -8,7 +8,7 @@ import (
 	"io"
 	"strings"
 
-	endpoints "chawk/endpoints"
+	endpoints "github.com/ToyGuy22/chawk/endpoints"
 )
 
 type AnnouncementService struct {
