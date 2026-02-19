@@ -13,7 +13,7 @@ import (
 	"sync"
 	"time"
 
-	endpoints "github.com/ToyGuy22/chawk/endpoints"
+	endpoints "github.com/sugarvoid/chawk/endpoints"
 )
 
 var (

@@ -1,3 +1,3 @@
-module github.com/ToyGuy22/chawk
+module github.com/sugarvoid/chawk
 
 go 1.25.3

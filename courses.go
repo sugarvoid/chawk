@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	endpoints "github.com/ToyGuy22/chawk/endpoints"
+	endpoints "github.com/sugarvoid/chawk/endpoints"
 )
 
 type CourseService struct {
