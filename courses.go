@@ -109,6 +109,10 @@ const (
 	AvailabilityYes      string = "Yes"
 	AvailabilityNo       string = "No"
 	AvailabilityDisabled string = "Disabled"
+
+	RoleStudent    string = "Student"
+	RoleInstructor string = "Instructor"
+	RoleTA         string = "TeachingAssistant"
 )
 
 // type UserCourseEnrollment struct {
