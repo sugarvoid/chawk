@@ -136,9 +136,12 @@ func (cs *CourseService) CreateCourse(ctx context.Context, courseID string, titl
 		Organization: false,
 		Availability: CourseAvailability{
 			Available: AvailabilityNo,
+			Duration: CourseDuration{
+				Type: "Continuous",
+			},
 		},
 		Enrollment: Enrollment{
-			Type: "Continuous",
+			Type: "InstructorLed",
 		},
 	}
 
