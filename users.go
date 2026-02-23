@@ -127,6 +127,25 @@ type NameUpdate struct {
 	Family *string `json:"family,omitempty"`
 }
 
+type CourseEnrollment struct {
+	CourseID     string
+	ExternalID   string
+	CourseRoleID string
+}
+
+type enrollmentResponse struct {
+	Results []struct {
+		CourseID     string `json:"courseId"`
+		CourseRoleID string `json:"courseRoleId"`
+		Course       struct {
+			ExternalID string `json:"externalId"`
+		} `json:"course"`
+	} `json:"results"`
+	Paging struct {
+		NextPage string `json:"nextPage"`
+	} `json:"paging"`
+}
+
 func (us *UserService) CreateUser(ctx context.Context, username string, fName string, lName string, email string, password string) error {
 	username = strings.TrimSpace(username)
 	fName = strings.TrimSpace(fName)
@@ -375,4 +394,48 @@ func (us *UserService) UpdateUserAvailability(ctx context.Context, username stri
 	return us.Update(ctx, username, UserUpdate{
 		Availability: &UserAvailability{Available: availability},
 	})
+}
+
+func (us *UserService) GetCourses(ctx context.Context, username string) ([]CourseEnrollment, error) {
+	//TODO: Add the endpoints
+	url := fmt.Sprintf("/learn/api/public/v1/users/userName:%s/courses?expand=course&fields=courseId,courseRoleId,course.externalId", username)
+
+	var allEnrollments []CourseEnrollment
+
+	for {
+		resp, err := us.client.Get(ctx, url)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get user courses: %w", err)
+		}
+		defer resp.Body.Close()
+
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return nil, fmt.Errorf("failed to read response body: %w", err)
+		}
+
+		if resp.StatusCode != http.StatusOK {
+			return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(body))
+		}
+
+		var result enrollmentResponse
+		if err := json.Unmarshal(body, &result); err != nil {
+			return nil, fmt.Errorf("failed to parse response: %w", err)
+		}
+
+		for _, r := range result.Results {
+			allEnrollments = append(allEnrollments, CourseEnrollment{
+				CourseID:     r.CourseID,
+				ExternalID:   r.Course.ExternalID,
+				CourseRoleID: r.CourseRoleID,
+			})
+		}
+
+		if result.Paging.NextPage == "" {
+			break
+		}
+		url = result.Paging.NextPage
+	}
+
+	return allEnrollments, nil
 }
