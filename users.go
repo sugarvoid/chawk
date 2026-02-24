@@ -131,12 +131,14 @@ type CourseEnrollment struct {
 	CourseID     string
 	ExternalID   string
 	CourseRoleID string
+	Created      time.Time
 }
 
 type enrollmentResponse struct {
 	Results []struct {
-		CourseID     string `json:"courseId"`
-		CourseRoleID string `json:"courseRoleId"`
+		CourseID     string    `json:"courseId"`
+		CourseRoleID string    `json:"courseRoleId"`
+		Created      time.Time `json:"created"`
 		Course       struct {
 			ExternalID string `json:"externalId"`
 		} `json:"course"`
@@ -398,7 +400,7 @@ func (us *UserService) UpdateUserAvailability(ctx context.Context, username stri
 
 func (us *UserService) GetCourses(ctx context.Context, username string) ([]CourseEnrollment, error) {
 	//TODO: Add the endpoints
-	url := fmt.Sprintf("/learn/api/public/v1/users/userName:%s/courses?expand=course&fields=courseId,courseRoleId,course.externalId", username)
+	url := fmt.Sprintf("/learn/api/public/v1/users/userName:%s/courses?expand=course&fields=courseId,courseRoleId,created,course.externalId", username)
 
 	var allEnrollments []CourseEnrollment
 
@@ -428,6 +430,7 @@ func (us *UserService) GetCourses(ctx context.Context, username string) ([]Cours
 				CourseID:     r.CourseID,
 				ExternalID:   r.Course.ExternalID,
 				CourseRoleID: r.CourseRoleID,
+				Created:      r.Created,
 			})
 		}
 
