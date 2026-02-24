@@ -160,6 +160,7 @@ type courseUsersResponse struct {
 	} `json:"paging"`
 }
 
+// Create is a basic version for making quick and dirty courses.
 func (cs *CourseService) Create(ctx context.Context, courseID string, title string, termID string) error {
 	courseID = strings.TrimSpace(courseID)
 	title = strings.TrimSpace(title)
