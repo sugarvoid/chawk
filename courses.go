@@ -134,15 +134,16 @@ type courseUsersResponse struct {
 		ID           string `json:"id"`
 		CourseRoleID string `json:"courseRoleId"`
 		User         struct {
-			UserName     string `json:"userName"`
-			Availability struct {
-				Available string `json:"available"`
-			} `json:"availability"`
+			UserName string `json:"userName"`
+
 			Name struct {
 				Given  string `json:"given"`
 				Family string `json:"family"`
 			} `json:"name"`
 		} `json:"user"`
+		Availability struct {
+			Available string `json:"available"`
+		} `json:"availability"`
 	} `json:"results"`
 	Paging struct {
 		NextPage string `json:"nextPage"`
@@ -574,7 +575,7 @@ func (cs *CourseService) UpdateGradeColumnValue(ctx context.Context, courseID st
 
 func (cs *CourseService) GetUsers(ctx context.Context, courseID string) ([]CourseUser, error) {
 	//TODO: Move to endpoint file
-	path := fmt.Sprintf("/learn/api/public/v1/courses/courseId:%s/users?expand=user&fields=id,courseRoleId,user.userName,user.availability.available,user.name.given,user.name.family", courseID)
+	path := fmt.Sprintf("/learn/api/public/v1/courses/courseId:%s/users?expand=user&fields=id,courseRoleId,user.userName,availability.available,user.name.given,user.name.family", courseID)
 
 	var allUsers []CourseUser
 
@@ -605,7 +606,7 @@ func (cs *CourseService) GetUsers(ctx context.Context, courseID string) ([]Cours
 				UserName:     r.User.UserName,
 				FirstName:    r.User.Name.Given,
 				LastName:     r.User.Name.Family,
-				Available:    r.User.Availability.Available,
+				Available:    r.Availability.Available,
 				CourseRoleID: r.CourseRoleID,
 			})
 		}
