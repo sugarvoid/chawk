@@ -120,6 +120,35 @@ const (
 // 	Availability Availability `json:"availability"`
 // }
 
+type CourseUser struct {
+	ID           string
+	UserName     string
+	FirstName    string
+	LastName     string
+	Available    string
+	CourseRoleID string
+}
+
+type courseUsersResponse struct {
+	Results []struct {
+		ID           string `json:"id"`
+		CourseRoleID string `json:"courseRoleId"`
+		User         struct {
+			UserName     string `json:"userName"`
+			Availability struct {
+				Available string `json:"available"`
+			} `json:"availability"`
+			Name struct {
+				Given  string `json:"given"`
+				Family string `json:"family"`
+			} `json:"name"`
+		} `json:"user"`
+	} `json:"results"`
+	Paging struct {
+		NextPage string `json:"nextPage"`
+	} `json:"paging"`
+}
+
 func (cs *CourseService) CreateCourse(ctx context.Context, courseID string, title string, termID string) error {
 	courseID = strings.TrimSpace(courseID)
 	title = strings.TrimSpace(title)
@@ -541,4 +570,51 @@ func (cs *CourseService) GetGradeColumnValue(ctx context.Context, courseID strin
 func (cs *CourseService) UpdateGradeColumnValue(ctx context.Context, courseID string, announcementID string) error {
 	// TODO: implement
 	return errors.New("UpdateGradeColumnValue not implemented")
+}
+
+func (cs *CourseService) GetUsers(ctx context.Context, courseID string) ([]CourseUser, error) {
+	//TODO: Move to endpoint file
+	path := fmt.Sprintf("/learn/api/public/v1/courses/courseId:%s/users?expand=user&fields=id,courseRoleId,user.userName,user.availability.available,user.name.given,user.name.family", courseID)
+
+	var allUsers []CourseUser
+
+	for {
+		resp, err := cs.client.Get(ctx, path)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get course users: %w", err)
+		}
+		defer resp.Body.Close()
+
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return nil, fmt.Errorf("failed to read response body: %w", err)
+		}
+
+		if resp.StatusCode != http.StatusOK {
+			return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(body))
+		}
+
+		var result courseUsersResponse
+		if err := json.Unmarshal(body, &result); err != nil {
+			return nil, fmt.Errorf("failed to parse response: %w", err)
+		}
+
+		for _, r := range result.Results {
+			allUsers = append(allUsers, CourseUser{
+				ID:           r.ID,
+				UserName:     r.User.UserName,
+				FirstName:    r.User.Name.Given,
+				LastName:     r.User.Name.Family,
+				Available:    r.User.Availability.Available,
+				CourseRoleID: r.CourseRoleID,
+			})
+		}
+
+		if result.Paging.NextPage == "" {
+			break
+		}
+		path = result.Paging.NextPage
+	}
+
+	return allUsers, nil
 }
