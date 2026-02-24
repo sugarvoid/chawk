@@ -89,6 +89,16 @@ type CourseUpdateRequest struct {
 	TermID       *string             `json:"termId,omitempty"`
 	Availability *CourseAvailability `json:"availability,omitempty"`
 	DataSourceID *string             `json:"dataSourceId,omitempty"`
+	Description  *string             `json:"description,omitempty"`
+}
+
+type CourseCreateRequest struct {
+	Name         *string             `json:"name,omitempty"`
+	ExternalID   *string             `json:"termId,omitempty"`
+	TermID       *string             `json:"externalId,omitempty"`
+	Availability *CourseAvailability `json:"availability,omitempty"`
+	DataSourceID *string             `json:"dataSourceId,omitempty"`
+	Description  *string             `json:"description,omitempty"`
 }
 
 type EnrollmentRequest struct {
@@ -150,7 +160,7 @@ type courseUsersResponse struct {
 	} `json:"paging"`
 }
 
-func (cs *CourseService) CreateCourse(ctx context.Context, courseID string, title string, termID string) error {
+func (cs *CourseService) Create(ctx context.Context, courseID string, title string, termID string) error {
 	courseID = strings.TrimSpace(courseID)
 	title = strings.TrimSpace(title)
 	termID = strings.TrimSpace(termID)
@@ -164,6 +174,61 @@ func (cs *CourseService) CreateCourse(ctx context.Context, courseID string, titl
 		Name:         title,
 		TermID:       termID,
 		Organization: false,
+		Availability: CourseAvailability{
+			Available: AvailabilityNo,
+			Duration: CourseDuration{
+				Type: "Continuous",
+			},
+		},
+		Enrollment: Enrollment{
+			Type: "InstructorLed",
+		},
+	}
+
+	//fmt.Printf("%v\n", data)
+
+	url := endpoints.Courses.Create()
+	resp, err := cs.client.Post(ctx, url, data)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	switch resp.StatusCode {
+	case 201:
+		return nil
+		//client.Logger.Info(fmt.Sprintf("User %s was created successfully", username))
+	case 403:
+		return ErrInsufficientPrivileges
+		//client.Logger.Error("Insufficient privileges to create a new user")
+	case 409:
+		return ErrCourseExist
+		//client.Logger.Error(fmt.Sprintf("User with ID %s already exists", username))
+	case 400:
+		body, _ := io.ReadAll(io.LimitReader(resp.Body, MAX_RESPONSE_SIZE))
+		return fmt.Errorf("The request did not specify valid data. %s", string(body))
+	default:
+		body, _ := io.ReadAll(io.LimitReader(resp.Body, MAX_RESPONSE_SIZE))
+		return fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(body))
+	}
+}
+
+func (cs *CourseService) CreatePro(ctx context.Context, req *CourseCreateRequest) error {
+	courseID := strings.TrimSpace(*req.ExternalID)
+	title := strings.TrimSpace(*req.Name)
+	termID := strings.TrimSpace(*req.TermID)
+	description := strings.TrimSpace(*req.Description)
+
+	if courseID == "" || title == "" || termID == "" {
+		return errors.New("missing parameters: courseID, title, termID")
+	}
+
+	data := Course{
+		CourseID:     courseID,
+		Name:         title,
+		TermID:       termID,
+		Organization: false,
+		Description:  description,
 		Availability: CourseAvailability{
 			Available: AvailabilityNo,
 			Duration: CourseDuration{
@@ -483,6 +548,10 @@ func (cs *CourseService) Update(ctx context.Context, courseID string, req *Cours
 	if req.DataSourceID != nil {
 		trimmed := strings.TrimSpace(*req.DataSourceID)
 		req.DataSourceID = &trimmed
+	}
+	if req.Description != nil {
+		trimmed := strings.TrimSpace(*req.Description)
+		req.Description = &trimmed
 	}
 
 	url := endpoints.Courses.Update(courseID)
