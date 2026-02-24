@@ -132,6 +132,7 @@ type CourseEnrollment struct {
 	ExternalID   string
 	CourseRoleID string
 	Created      time.Time
+	Name         string
 }
 
 type enrollmentResponse struct {
@@ -141,6 +142,7 @@ type enrollmentResponse struct {
 		Created      time.Time `json:"created"`
 		Course       struct {
 			ExternalID string `json:"externalId"`
+			Name       string `json:"name"`
 		} `json:"course"`
 	} `json:"results"`
 	Paging struct {
@@ -400,7 +402,7 @@ func (us *UserService) UpdateUserAvailability(ctx context.Context, username stri
 
 func (us *UserService) GetCourses(ctx context.Context, username string) ([]CourseEnrollment, error) {
 	//TODO: Add the endpoints
-	url := fmt.Sprintf("/learn/api/public/v1/users/userName:%s/courses?expand=course&fields=courseId,courseRoleId,created,course.externalId", username)
+	url := fmt.Sprintf("/learn/api/public/v1/users/userName:%s/courses?expand=course&fields=courseId,courseRoleId,created,course.externalId,course.name", username)
 
 	var allEnrollments []CourseEnrollment
 
@@ -431,6 +433,7 @@ func (us *UserService) GetCourses(ctx context.Context, username string) ([]Cours
 				ExternalID:   r.Course.ExternalID,
 				CourseRoleID: r.CourseRoleID,
 				Created:      r.Created,
+				Name:         r.Course.Name,
 			})
 		}
 
