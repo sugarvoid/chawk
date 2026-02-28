@@ -628,21 +628,6 @@ func (cs *CourseService) RemoveUser(ctx context.Context, courseId string, userna
 
 //TODO: Re-evaluate if the grade stuff needs to be its own thing
 
-func (cs *CourseService) CreateGradeColumn(ctx context.Context, courseID string, announcementID string) error {
-	// TODO: implement
-	return errors.New("CreateGradeColumn not implemented")
-}
-
-func (cs *CourseService) GetGradeColumnValue(ctx context.Context, courseID string, announcementID string) error {
-	// TODO: implement
-	return errors.New("GetGradeColumnValue not implemented")
-}
-
-func (cs *CourseService) UpdateGradeColumnValue(ctx context.Context, courseID string, announcementID string) error {
-	// TODO: implement
-	return errors.New("UpdateGradeColumnValue not implemented")
-}
-
 func (cs *CourseService) GetUsers(ctx context.Context, courseID string) ([]CourseUser, error) {
 	//TODO: Move to endpoint file
 	path := fmt.Sprintf("/learn/api/public/v1/courses/courseId:%s/users?expand=user&fields=id,courseRoleId,user.userName,availability.available,user.name.given,user.name.family", courseID)
