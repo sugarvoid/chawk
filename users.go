@@ -401,8 +401,8 @@ func (us *UserService) UpdateUserAvailability(ctx context.Context, username stri
 }
 
 func (us *UserService) GetCourses(ctx context.Context, username string) ([]CourseEnrollment, error) {
-	//TODO: Add the endpoints
-	url := fmt.Sprintf("/learn/api/public/v1/users/userName:%s/courses?expand=course&fields=courseId,courseRoleId,created,course.externalId,course.name", username)
+	//url := fmt.Sprintf("/learn/api/public/v1/users/userName:%s/courses?expand=course&fields=courseId,courseRoleId,created,course.externalId,course.name", username)
+	url := endpoints.Users.GetMemberships(username)
 
 	var allEnrollments []CourseEnrollment
 

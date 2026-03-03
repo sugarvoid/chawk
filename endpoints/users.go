@@ -22,8 +22,7 @@ func (userEndpoints) GetId(username string) string {
 	return fmt.Sprintf("/learn/api/public/v1/users/userName:%s", username)
 }
 
-func GetMemberships(username string) string {
-	return fmt.Sprintf("/learn/api/public/v1/users/userName:%s/courses", username)
+func (userEndpoints) GetMemberships(username string) string {
+	//return fmt.Sprintf("/learn/api/public/v1/users/userName:%s/courses", username)
+	return fmt.Sprintf("/learn/api/public/v1/users/userName:%s/courses?expand=course&fields=courseId,courseRoleId,created,course.externalId,course.name", username)
 }
-
-//TODO: Add the rest

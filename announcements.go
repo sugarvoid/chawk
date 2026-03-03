@@ -38,10 +38,9 @@ type Announcement struct {
 	Creator       string                   `json:"creator"`
 }
 
+// GetAllAnnouncements returns all the announcements from a course
 func (c *AnnouncementService) GetAllAnnouncements(ctx context.Context, courseID string) ([]Announcement, error) {
-
 	courseID, err := RequiredString(courseID, "courseID")
-
 	if err != nil {
 		return nil, err
 	}
@@ -74,6 +73,7 @@ func (c *AnnouncementService) GetAllAnnouncements(ctx context.Context, courseID 
 	return response.Results, nil
 }
 
+// GetAnnouncement get a single announcement by its ID
 func (c *AnnouncementService) GetAnnouncement(ctx context.Context, courseID string, announcementID string) (Announcement, error) {
 	// TODO: implement Blackboard announcement get
 	courseID = strings.TrimSpace(courseID)
