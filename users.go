@@ -17,13 +17,6 @@ type UserService struct {
 	client *BlackboardClient
 }
 
-func (s *UserService) url(id string) string {
-	if id == "" {
-		return "/learn/api/public/v1/users"
-	}
-	return fmt.Sprintf("/learn/api/public/v1/users/%s", id)
-}
-
 var ErrUserNotFound = errors.New("user account doesn't exist")
 var ErrUserExist = errors.New("user already exists")
 var ErrMissingName = errors.New("missing first and last name")
@@ -43,15 +36,15 @@ type User struct {
 	BirthDate          *time.Time         `json:"birthDate,omitempty"`
 	InstitutionRoleIDs []string           `json:"institutionRoleIds"`
 	SystemRoleIDs      []string           `json:"systemRoleIds,omitempty"`
-	Availability       UserAvailability   `json:"availability,omitempty"`
-	Name               Name               `json:"name,omitempty"`
-	Job                Job                `json:"job,omitempty"`
-	Contact            Contact            `json:"contact,omitempty"`
-	Address            Address            `json:"address,omitempty"`
-	Locale             Locale             `json:"locale,omitempty"`
-	Avatar             Avatar             `json:"avatar,omitempty"`
+	Availability       UserAvailability   `json:"availability,omitzero"`
+	Name               Name               `json:"name,omitzero"`
+	Job                Job                `json:"job,omitzero"`
+	Contact            Contact            `json:"contact,omitzero"`
+	Address            Address            `json:"address,omitzero"`
+	Locale             Locale             `json:"locale,omitzero"`
+	Avatar             Avatar             `json:"avatar,omitzero"`
 	Pronunciation      string             `json:"pronunciation,omitempty"`
-	PronunciationAudio PronunciationAudio `json:"pronunciationAudio,omitempty"`
+	PronunciationAudio PronunciationAudio `json:"pronunciationAudio,omitzero"`
 }
 
 type Name struct {
@@ -324,10 +317,6 @@ func (us *UserService) UpdateEmail(ctx context.Context, username, newEmail strin
 		},
 	})
 }
-
-// func (uc *BlackboardClient) UpdateInstitutionEmail(username, newEmail string) error {
-// 	return uc.updateUser(username, map[string]interface{}{"contact": map[string]string{"institutionEmail": strings.TrimSpace(newEmail)}}, "institution email changed")
-// }
 
 func (us *UserService) UpdateInstitutionEmail(ctx context.Context, username, newEmail string) error {
 	email := strings.TrimSpace(newEmail)

@@ -24,30 +24,30 @@ var ErrInvalidRole = errors.New("invalid course role")
 
 type CourseAvailability struct {
 	Available string         `json:"available"`
-	Duration  CourseDuration `json:"duration,omitempty"`
+	Duration  CourseDuration `json:"duration,omitzero"`
 }
 
 type CourseDuration struct {
 	Type      string    `json:"type,omitempty"`
-	Start     time.Time `json:"start,omitempty"`
-	End       time.Time `json:"end,omitempty"`
+	Start     time.Time `json:"start,omitzero"`
+	End       time.Time `json:"end,omitzero"`
 	DaysOfUse int       `json:"daysOfUse,omitempty"`
 }
 
 type Enrollment struct {
 	Type       string    `json:"type,omitempty"`
-	Start      time.Time `json:"start,omitempty"`
-	End        time.Time `json:"end,omitempty"`
+	Start      time.Time `json:"start,omitzero"`
+	End        time.Time `json:"end,omitzero"`
 	AccessCode string    `json:"accessCode,omitempty"`
 }
 
 type CourseLocale struct {
-	ID    string `json:"id"`
-	Force bool   `json:"force"`
+	ID    string `json:"id,omitempty"`
+	Force bool   `json:"force,omitempty"`
 }
 
 type CopyHistory struct {
-	UUID string `json:"uuid"`
+	UUID string `json:"uuid,omitempty"`
 }
 
 type Course struct {
@@ -64,8 +64,8 @@ type Course struct {
 	AllowGuests    bool               `json:"allowGuests,omitempty"`
 	AllowObservers bool               `json:"allowObservers"`
 	ClosedComplete bool               `json:"closedComplete"`
-	Enrollment     Enrollment         `json:"enrollment,omitempty"`
-	Locale         CourseLocale       `json:"locale,omitempty"`
+	Enrollment     Enrollment         `json:"enrollment,omitzero"`
+	Locale         CourseLocale       `json:"locale,omitzero"`
 
 	// Read-only (set by server, ignored on create)
 	ID           string     `json:"id,omitempty"`
@@ -113,7 +113,7 @@ type MembershipAvailability struct {
 	Available *string `json:"available,omitempty"`
 }
 
-type AvailabilityStatus string
+//type AvailabilityStatus string
 
 const (
 	AvailabilityYes      string = "Yes"
@@ -123,6 +123,13 @@ const (
 	RoleStudent    string = "Student"
 	RoleInstructor string = "Instructor"
 	RoleTA         string = "TeachingAssistant"
+
+	//TODO: Find out what the string value is
+	RoleCourseBuilder string = ""
+	RoleFacilitator   string = ""
+	RoleSpectator     string = ""
+	RoleGraderstring  string = ""
+	RoleGuest         string = ""
 )
 
 // type UserCourseEnrollment struct {
@@ -160,7 +167,7 @@ type courseUsersResponse struct {
 	} `json:"paging"`
 }
 
-// Create is a basic version for making quick and dirty courses.
+// Create function that only needs the bare minimum. For simple creates.
 func (cs *CourseService) Create(ctx context.Context, courseID string, title string, termID string) error {
 	courseID = strings.TrimSpace(courseID)
 	title = strings.TrimSpace(title)
@@ -214,12 +221,14 @@ func (cs *CourseService) Create(ctx context.Context, courseID string, title stri
 	}
 }
 
+// A more advanced version of Create()
 func (cs *CourseService) CreatePro(ctx context.Context, req *CourseCreateRequest) error {
 	courseID := strings.TrimSpace(*req.ExternalID)
 	title := strings.TrimSpace(*req.Name)
 	termID := strings.TrimSpace(*req.TermID)
 	description := strings.TrimSpace(*req.Description)
 
+	//TODO: Test if TermID is blank.
 	if courseID == "" || title == "" || termID == "" {
 		return errors.New("missing parameters: courseID, title, termID")
 	}
@@ -270,20 +279,20 @@ func (cs *CourseService) CreatePro(ctx context.Context, req *CourseCreateRequest
 }
 
 // TODO: Rename parameters
-func (cs *CourseService) CopyCourseByCourseID(ctx context.Context, masterID, copyID string) (string, error) {
-	masterID = strings.TrimSpace(masterID)
-	copyID = strings.TrimSpace(copyID)
+func (cs *CourseService) CopyCourseByCourseID(ctx context.Context, sourceID, destinationID string) (string, error) {
+	sourceID = strings.TrimSpace(sourceID)
+	destinationID = strings.TrimSpace(destinationID)
 
-	if masterID == "" || copyID == "" {
-		return "", errors.New("masterID and copyID are required")
+	if sourceID == "" || destinationID == "" {
+		return "", errors.New("sourceID and destinationID are required")
 	}
 
 	// Build request
-	data := map[string]interface{}{
+	data := map[string]any{
 		"targetCourse": map[string]string{
-			"courseId": copyID,
+			"courseId": destinationID,
 		},
-		"copy": map[string]interface{}{
+		"copy": map[string]any{
 			"adaptiveReleaseRules": true,
 			"announcements":        true,
 			"assessments":          true,
@@ -314,7 +323,7 @@ func (cs *CourseService) CopyCourseByCourseID(ctx context.Context, masterID, cop
 		},
 	}
 
-	url := endpoints.Courses.Copy(masterID)
+	url := endpoints.Courses.Copy(sourceID)
 	resp, err := cs.client.Post(ctx, url, data)
 	if err != nil {
 		return "", err
