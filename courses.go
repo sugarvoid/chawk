@@ -168,13 +168,13 @@ type courseUsersResponse struct {
 }
 
 // Create function that only needs the bare minimum. For simple creates.
-func (cs *CourseService) Create(ctx context.Context, courseID string, title string, termID string) error {
+func (cs *CourseService) Create(ctx context.Context, courseID string, title string, termID string) (*Course, error) {
 	courseID = strings.TrimSpace(courseID)
 	title = strings.TrimSpace(title)
 	termID = strings.TrimSpace(termID)
 
 	if courseID == "" || title == "" || termID == "" {
-		return errors.New("missing parameters: courseID, title, termID")
+		return nil, errors.New("missing parameters: courseID, title, termID")
 	}
 
 	data := Course{
@@ -198,31 +198,39 @@ func (cs *CourseService) Create(ctx context.Context, courseID string, title stri
 	url := endpoints.Courses.Create()
 	resp, err := cs.client.Post(ctx, url, data)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer resp.Body.Close()
 
 	switch resp.StatusCode {
 	case 201:
-		return nil
+		body, err := io.ReadAll(io.LimitReader(resp.Body, MAX_RESPONSE_SIZE))
+		if err != nil {
+			return nil, fmt.Errorf("failed to read response body: %w", err)
+		}
+		var course Course
+		if err := json.Unmarshal(body, &course); err != nil {
+			return nil, fmt.Errorf("failed to parse course response: %w", err)
+		}
+		return &course, nil
 		//client.Logger.Info(fmt.Sprintf("User %s was created successfully", username))
 	case 403:
-		return ErrInsufficientPrivileges
+		return nil, ErrInsufficientPrivileges
 		//client.Logger.Error("Insufficient privileges to create a new user")
 	case 409:
-		return ErrCourseExist
+		return nil, ErrCourseExist
 		//client.Logger.Error(fmt.Sprintf("User with ID %s already exists", username))
 	case 400:
 		body, _ := io.ReadAll(io.LimitReader(resp.Body, MAX_RESPONSE_SIZE))
-		return fmt.Errorf("The request did not specify valid data. %s", string(body))
+		return nil, fmt.Errorf("The request did not specify valid data. %s", string(body))
 	default:
 		body, _ := io.ReadAll(io.LimitReader(resp.Body, MAX_RESPONSE_SIZE))
-		return fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(body))
+		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(body))
 	}
 }
 
 // A more advanced version of Create()
-func (cs *CourseService) CreatePro(ctx context.Context, req *CourseCreateRequest) error {
+func (cs *CourseService) CreatePro(ctx context.Context, req *CourseCreateRequest) (*Course, error) {
 	courseID := strings.TrimSpace(*req.ExternalID)
 	title := strings.TrimSpace(*req.Name)
 	termID := strings.TrimSpace(*req.TermID)
@@ -230,7 +238,7 @@ func (cs *CourseService) CreatePro(ctx context.Context, req *CourseCreateRequest
 
 	//TODO: Test if TermID is blank.
 	if courseID == "" || title == "" || termID == "" {
-		return errors.New("missing parameters: courseID, title, termID")
+		return nil, errors.New("missing parameters: courseID, title, termID")
 	}
 
 	data := Course{
@@ -261,20 +269,28 @@ func (cs *CourseService) CreatePro(ctx context.Context, req *CourseCreateRequest
 
 	switch resp.StatusCode {
 	case 201:
-		return nil
+		body, err := io.ReadAll(io.LimitReader(resp.Body, MAX_RESPONSE_SIZE))
+		if err != nil {
+			return nil, fmt.Errorf("failed to read response body: %w", err)
+		}
+		var course Course
+		if err := json.Unmarshal(body, &course); err != nil {
+			return nil, fmt.Errorf("failed to parse course response: %w", err)
+		}
+		return &course, nil
 		//client.Logger.Info(fmt.Sprintf("User %s was created successfully", username))
 	case 403:
-		return ErrInsufficientPrivileges
+		return nil, ErrInsufficientPrivileges
 		//client.Logger.Error("Insufficient privileges to create a new user")
 	case 409:
-		return ErrCourseExist
+		return nil, ErrCourseExist
 		//client.Logger.Error(fmt.Sprintf("User with ID %s already exists", username))
 	case 400:
 		body, _ := io.ReadAll(io.LimitReader(resp.Body, MAX_RESPONSE_SIZE))
-		return fmt.Errorf("The request did not specify valid data. %s", string(body))
+		return nil, fmt.Errorf("The request did not specify valid data. %s", string(body))
 	default:
 		body, _ := io.ReadAll(io.LimitReader(resp.Body, MAX_RESPONSE_SIZE))
-		return fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(body))
+		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(body))
 	}
 }
 
