@@ -19,7 +19,7 @@ type CourseService struct {
 
 var ErrCourseNotFound = errors.New("course doesn't exist")
 var ErrCourseExist = errors.New("course already exists")
-var ErrUserAlreadyEnrolled = errors.New("user already enrolled in course")
+var ErrUserAlreadyEnrolled = errors.New("user already enrolled in course, use UpdateMembership() if needed")
 var ErrInvalidRole = errors.New("invalid course role")
 
 type CourseAvailability struct {
@@ -502,6 +502,9 @@ func (cs *CourseService) upsertMembership(ctx context.Context, method string, us
 	case http.StatusNotFound:
 		return ErrUserNotFound
 
+	case 409:
+		return ErrUserAlreadyEnrolled
+
 	case http.StatusBadRequest, http.StatusInternalServerError:
 		body, _ := io.ReadAll(io.LimitReader(resp.Body, MAX_RESPONSE_SIZE))
 		return fmt.Errorf("invalid user update: %s", string(body))
@@ -578,6 +581,7 @@ func (cs *CourseService) Update(ctx context.Context, courseID string, req *Cours
 			return nil, fmt.Errorf("failed to decode updated course: %w", err)
 		}
 		return &updated, nil
+
 	case 404:
 		return nil, fmt.Errorf("course %s not found", courseID)
 	case 403:
