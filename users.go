@@ -400,9 +400,9 @@ func (us *UserService) GetCourses(ctx context.Context, username string) ([]Cours
 		if err != nil {
 			return nil, fmt.Errorf("failed to get user courses: %w", err)
 		}
-		defer resp.Body.Close()
 
-		body, err := io.ReadAll(resp.Body)
+		body, err := io.ReadAll(io.LimitReader(resp.Body, MAX_RESPONSE_SIZE))
+		resp.Body.Close()
 		if err != nil {
 			return nil, fmt.Errorf("failed to read response body: %w", err)
 		}

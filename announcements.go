@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/http"
 	"strings"
 
 	endpoints "github.com/sugarvoid/chawk/endpoints"
@@ -47,30 +48,45 @@ func (c *AnnouncementService) GetAllAnnouncements(ctx context.Context, courseID 
 
 	url := endpoints.Announcements.GetAllByCourseId(courseID)
 
-	resp, err := c.client.Get(ctx, url)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
+	var allAnnouncements []Announcement
 
-	if resp.StatusCode != 200 {
-		return nil, fmt.Errorf("failed to get user: %d", resp.StatusCode)
+	for {
+		resp, err := c.client.Get(ctx, url)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get announcements: %w", err)
+		}
+
+		body, err := io.ReadAll(io.LimitReader(resp.Body, MAX_RESPONSE_SIZE))
+		resp.Body.Close()
+
+		if err != nil {
+			return nil, fmt.Errorf("failed to read response body: %w", err)
+		}
+
+		if resp.StatusCode != http.StatusOK {
+			return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(body))
+		}
+
+		var result struct {
+			Results []Announcement `json:"results"`
+			Paging  struct {
+				NextPage string `json:"nextPage"`
+			} `json:"paging"`
+		}
+
+		if err := json.Unmarshal(body, &result); err != nil {
+			return nil, fmt.Errorf("failed to parse response: %w", err)
+		}
+
+		allAnnouncements = append(allAnnouncements, result.Results...)
+
+		if result.Paging.NextPage == "" {
+			break
+		}
+		url = result.Paging.NextPage
 	}
 
-	body, err := io.ReadAll(io.LimitReader(resp.Body, MAX_RESPONSE_SIZE))
-	if err != nil {
-		return nil, err
-	}
-
-	var response struct {
-		Results []Announcement `json:"results"`
-	}
-
-	if err := json.Unmarshal(body, &response); err != nil {
-		return nil, err
-	}
-
-	return response.Results, nil
+	return allAnnouncements, nil
 }
 
 // GetAnnouncement get a single announcement by its ID
