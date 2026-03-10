@@ -263,7 +263,7 @@ func (cs *CourseService) CreatePro(ctx context.Context, req *CourseCreateRequest
 	url := endpoints.Courses.Create()
 	resp, err := cs.client.Post(ctx, url, data)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer resp.Body.Close()
 
