@@ -66,6 +66,7 @@ func NewClient(clientID, clientSecret, baseURL, tokenPath string) (*BlackboardCl
 	client.Users = &UserService{client: client}
 	client.Courses = &CourseService{client: client}
 	client.Announcement = &AnnouncementService{client: client}
+	client.Gradebook = &GradebookService{client: client}
 
 	// Attempt to load token from file, ignore error if file missing or expired
 	// We will make a new one later
