@@ -40,6 +40,7 @@ type BlackboardClient struct {
 	Users        *UserService
 	Courses      *CourseService
 	Announcement *AnnouncementService
+	Gradebook    *GradebookService
 }
 
 // NewClient initializes and returns a new Blackboard API Client.
