@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	//"github.com/sugarvoid/chawk"
 	endpoints "github.com/sugarvoid/chawk/endpoints"
 )
 
@@ -111,6 +112,22 @@ type EnrollmentRequest struct {
 
 type MembershipAvailability struct {
 	Available *string `json:"available,omitempty"`
+}
+
+type CourseMembership struct {
+	CourseID      *string                 `json:"courseId"`
+	ChildCourseID *string                 `json:"childCourseId,omitempty"`
+	CourseRoleID  *string                 `json:"courseRoleId"`
+	Availability  *MembershipAvailability `json:"availability"`
+	User          *User                   `json:"user"`
+	// User          struct {
+	// 	UserName   string `json:"userName"`
+	// 	ExternalID string `json:"externalId"`
+	// 	Name       struct {
+	// 		Given  string `json:"given"`
+	// 		Family string `json:"family"`
+	// 	} `json:"name"`
+	// } `json:"user"`
 }
 
 //type AvailabilityStatus string
@@ -478,6 +495,10 @@ func (cs *CourseService) DeleteCourse(ctx context.Context, courseID string) erro
 
 func (cs *CourseService) CreateMembership(ctx context.Context, username, courseId string, update EnrollmentRequest) error {
 	return cs.upsertMembership(ctx, "PUT", username, courseId, update)
+}
+
+func (cs *CourseService) GetMembership(ctx context.Context, username string, courseId string) (*CourseMembership, error) {
+	return nil, errors.New("GetMembership not implemented")
 }
 
 func (cs *CourseService) UpdateMembership(ctx context.Context, username, courseId string, update EnrollmentRequest) error {

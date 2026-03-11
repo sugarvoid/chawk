@@ -43,6 +43,10 @@ func (courseEndpoints) GetMembership(courseId string, username string) string {
 	return fmt.Sprintf("/learn/api/public/v1/courses/courseId:%s/users/userName:%s", courseId, username)
 }
 
+func (courseEndpoints) GetContent(courseId string) string {
+	return fmt.Sprintf("/learn/api/public/v1/courses/courseId:%s/contents", courseId)
+}
+
 func (courseEndpoints) CreateMembership(courseId string, username string) string {
 	return Courses.GetMembership(courseId, username)
 	//return fmt.Sprintf("/learn/api/public/v1/courses/courseId:%s/users/userName:%s", courseId, username)
