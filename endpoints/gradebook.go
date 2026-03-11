@@ -4,7 +4,7 @@ import "fmt"
 
 type gradeEndpoints struct{}
 
-var Grades = gradeEndpoints{}
+var Gradebook = gradeEndpoints{}
 
 func (gradeEndpoints) GetColumns(courseID string) string {
 	return fmt.Sprintf("/learn/api/public/v2/courses/courseId:%s/gradebook/columns", courseID)
@@ -12,4 +12,8 @@ func (gradeEndpoints) GetColumns(courseID string) string {
 
 func (gradeEndpoints) GetColumn(courseID, columnID string) string {
 	return fmt.Sprintf("/learn/api/public/v2/courses/courseId:%s/gradebook/columns/%s", courseID, columnID)
+}
+
+func (gradeEndpoints) CreateColumn(courseID string) string {
+	return Gradebook.GetColumns(courseID)
 }
