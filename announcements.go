@@ -109,12 +109,40 @@ func (c *AnnouncementService) UpdateAnnouncement(ctx context.Context, courseID s
 	return errors.New("UpdateAnnouncement not implemented")
 }
 
-func (c *AnnouncementService) deleteAnnouncement(ctx context.Context, courseID string, announcementID string) error {
-	// TODO: implement
-	return errors.New("deleteAnnouncement not implemented")
+func (c *AnnouncementService) DeleteAnnouncement(ctx context.Context, courseID, announcementID string) error {
+	url := endpoints.Announcements.DeleteById(courseID, announcementID)
+
+	resp, err := c.client.Delete(ctx, url)
+	if err != nil {
+		return fmt.Errorf("failed to delete announcement: %w", err)
+	}
+	defer resp.Body.Close()
+
+	switch resp.StatusCode {
+	case http.StatusNoContent:
+		return nil
+	case http.StatusForbidden:
+		return ErrInsufficientPrivileges
+	case http.StatusNotFound:
+		return fmt.Errorf("announcement %s not found in course %s", announcementID, courseID)
+	default:
+		body, _ := io.ReadAll(io.LimitReader(resp.Body, MAX_RESPONSE_SIZE))
+		return fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(body))
+	}
 }
 
-func (c *AnnouncementService) DeleteAnnouncements(ctx context.Context, courseID string, announcementID string) error {
-	// TODO: implement
-	return errors.New("DeleteAnnouncements not implemented")
+func (c *AnnouncementService) DeleteAllAnnouncements(ctx context.Context, courseID string) error {
+	announcements, err := c.GetAllAnnouncements(ctx, courseID)
+	if err != nil {
+		return fmt.Errorf("failed to get announcements: %w", err)
+	}
+
+	for _, a := range announcements {
+		if err := c.DeleteAnnouncement(ctx, courseID, a.ID); err != nil {
+			return fmt.Errorf("failed to delete announcement %s: %w", a.ID, err)
+		}
+		//fmt.Printf("Deleted announcement %q\n", a.Title)
+	}
+
+	return nil
 }
