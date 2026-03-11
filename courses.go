@@ -400,10 +400,10 @@ func (cs *CourseService) DoesCourseExist(ctx context.Context, courseID string) (
 	}
 }
 
-func (cs *CourseService) GetCourseByCourseId(ctx context.Context, courseId string) (*Course, error) {
-	courseId = strings.TrimSpace(courseId)
+func (cs *CourseService) GetCourseByCourseId(ctx context.Context, courseID string) (*Course, error) {
+	courseID = strings.TrimSpace(courseID)
 
-	url := endpoints.Courses.GetByCourseId(courseId)
+	url := endpoints.Courses.GetByCourseId(courseID)
 	resp, err := cs.client.Get(ctx, url)
 	if err != nil {
 		return nil, err
@@ -489,32 +489,28 @@ func (cs *CourseService) DeleteCourse(ctx context.Context, courseID string) erro
 	return fmt.Errorf("failed to delete course %s (HTTP code %d) %s", courseID, resp.StatusCode, string(body))
 }
 
-// func (cs *CourseService) EnrollUserByUsername(ctx context.Context, courseId string, username string) error {
-// 	return errors.New("EnrollUserByUsername not implemented")
-// }
-
-func (cs *CourseService) CreateMembership(ctx context.Context, username, courseId string, update EnrollmentRequest) error {
-	return cs.upsertMembership(ctx, "PUT", username, courseId, update)
+func (cs *CourseService) CreateMembership(ctx context.Context, username, courseID string, update EnrollmentRequest) error {
+	return cs.upsertMembership(ctx, "PUT", username, courseID, update)
 }
 
-func (cs *CourseService) GetMembership(ctx context.Context, username string, courseId string) (*CourseMembership, error) {
+func (cs *CourseService) GetMembership(ctx context.Context, username string, courseID string) (*CourseMembership, error) {
 	return nil, errors.New("GetMembership not implemented")
 }
 
-func (cs *CourseService) UpdateMembership(ctx context.Context, username, courseId string, update EnrollmentRequest) error {
-	return cs.upsertMembership(ctx, "PATCH", username, courseId, update)
+func (cs *CourseService) UpdateMembership(ctx context.Context, username, courseID string, update EnrollmentRequest) error {
+	return cs.upsertMembership(ctx, "PATCH", username, courseID, update)
 }
 
 // TODO: Create and update are the same, other than put or patch. Could this be better?
-func (cs *CourseService) upsertMembership(ctx context.Context, method string, username string, courseId string, update EnrollmentRequest) error {
+func (cs *CourseService) upsertMembership(ctx context.Context, method string, username string, courseID string, update EnrollmentRequest) error {
 	//TODO: Add course not found, user already enrolled, blah blah blah...
 	username = strings.TrimSpace(username)
-	courseId = strings.TrimSpace(courseId)
-	if username == "" || courseId == "" {
+	courseID = strings.TrimSpace(courseID)
+	if username == "" || courseID == "" {
 		return ErrEmptyStringParameter
 	}
 
-	url := endpoints.Courses.CreateMembership(courseId, username)
+	url := endpoints.Courses.CreateMembership(courseID, username)
 	var resp *http.Response
 	var err error
 
@@ -537,7 +533,9 @@ func (cs *CourseService) upsertMembership(ctx context.Context, method string, us
 		return nil
 
 	case http.StatusNotFound:
-		return ErrUserNotFound
+		// TODO: This can be User does not exist; or Role does not exist
+		body, _ := io.ReadAll(io.LimitReader(resp.Body, MAX_RESPONSE_SIZE))
+		return fmt.Errorf("enrolling user failed: %s", string(body))
 
 	case 409:
 		return ErrUserAlreadyEnrolled
@@ -556,12 +554,12 @@ func (cs *CourseService) upsertMembership(ctx context.Context, method string, us
 	}
 }
 
-func (cs *CourseService) UpdateMembershipAvailability(ctx context.Context, username string, courseId string, availability string) error {
+func (cs *CourseService) UpdateMembershipAvailability(ctx context.Context, username string, courseID string, availability string) error {
 	//TODO: Add course not found, user already enrolled, blah blah blah...
 	username = strings.TrimSpace(username)
-	courseId = strings.TrimSpace(courseId)
+	courseID = strings.TrimSpace(courseID)
 	availability = strings.TrimSpace(availability)
-	if username == "" || courseId == "" || availability == "" {
+	if username == "" || courseID == "" || availability == "" {
 		return ErrInvalidUsername
 	}
 
@@ -571,7 +569,7 @@ func (cs *CourseService) UpdateMembershipAvailability(ctx context.Context, usern
 		},
 	}
 
-	return cs.UpdateMembership(ctx, username, courseId, updateReq)
+	return cs.UpdateMembership(ctx, username, courseID, updateReq)
 
 }
 
@@ -634,25 +632,25 @@ func (cs *CourseService) Update(ctx context.Context, courseID string, req *Cours
 }
 
 // EnrollUserIntoCourse is a wrapper function that calls CreateMembership.
-func (cs *CourseService) EnrollUserIntoCourse(ctx context.Context, courseId string, username string, role string, availability string) error {
+func (cs *CourseService) EnrollUserIntoCourse(ctx context.Context, courseID string, username string, role string, availability string) error {
 	updateReq := EnrollmentRequest{
 		CourseRoleID: ToPtr(role),
 		Availability: &MembershipAvailability{
 			Available: ToPtr(availability),
 		},
 	}
-	return cs.CreateMembership(ctx, username, courseId, updateReq)
+	return cs.CreateMembership(ctx, username, courseID, updateReq)
 }
 
 // RemoveUser will remove a user from a course.
-func (cs *CourseService) RemoveUser(ctx context.Context, courseId string, username string) error {
+func (cs *CourseService) RemoveUser(ctx context.Context, courseID string, username string) error {
 	username = strings.TrimSpace(username)
-	courseId = strings.TrimSpace(courseId)
-	if username == "" || courseId == "" {
+	courseID = strings.TrimSpace(courseID)
+	if username == "" || courseID == "" {
 		return ErrEmptyStringParameter
 	}
 
-	url := endpoints.Courses.DeleteMembership(courseId, username)
+	url := endpoints.Courses.DeleteMembership(courseID, username)
 	var resp *http.Response
 	var err error
 
