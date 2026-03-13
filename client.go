@@ -36,6 +36,8 @@ type BlackboardClient struct {
 	tokenFile    string
 	httpClient   *http.Client
 
+	UserAgent string
+
 	// Sub Services
 	Users        *UserService
 	Courses      *CourseService
@@ -204,6 +206,11 @@ func (c *BlackboardClient) sendRequest(ctx context.Context, method string, path 
 
 	req.Header.Set("Authorization", "Bearer "+token.AccessToken)
 	req.Header.Set("Accept", "application/json")
+
+	// Add optional user-agent???
+	if c.UserAgent != "" {
+		req.Header.Set("User-Agent", c.UserAgent)
+	}
 
 	if body != nil && (method == http.MethodPost || method == http.MethodPut || method == http.MethodPatch) {
 		req.Header.Set("Content-Type", "application/json")
